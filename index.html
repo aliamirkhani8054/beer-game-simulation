@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beer Game Supply chain simulation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- ADDED: Chart.js library for performance chart -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- MODIFIED: Replaced EB Garamond with Roboto for a Material Design font style -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;900&family=Manrope:wght@400;600;700;800&family=Vazirmatn:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Base Styles */
+        html {
+            height: 100%;
+        }
+        body {
+            background-color: #e9eef4;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .main-content-area {
+            flex-grow: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Language-specific container styles */
+        .lang-en-container { font-family: 'Manrope', sans-serif; }
+        .lang-fa-container { font-family: 'Vazirmatn', sans-serif; direction: rtl; }
+        .lang-fa-container input, .lang-fa-container textarea { text-align: right; }
+
+        /* General UI components - Material Expressive 3 Inspired */
+        .material-card {
+            background-color: #fdfdff;
+            color: #191c1d;
+            /* Expressive Shape: Varied corner radius */
+            border-radius: 28px 28px 12px 12px;
+            border: 1px solid #dbe4e6;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1.5); /* Bouncier animation */
+            box-shadow: 0 8px 25px rgba(0, 105, 110, 0.12), 0 3px 8px rgba(0,0,0,0.05); /* Added depth with a stronger, theme-colored shadow */
+            position: relative;
+            overflow: hidden;
+        }
+        .material-card::before {
+             content: '';
+             position: absolute;
+             top: 0;
+             left: 0;
+             right: 0;
+             bottom: 0;
+             background-color: #00696e;
+             opacity: 0;
+             transition: opacity 0.3s ease;
+             pointer-events: none;
+        }
+
+        .material-card:hover:not(.no-hover) {
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transform: translateY(-4px);
+        }
+        .material-card:hover:not(.no-hover)::before {
+            opacity: 0.04; /* State Layer on hover */
+        }
+
+        .material-headline {
+            font-size: 1.85rem; /* Slightly larger */
+            font-weight: 800; /* Bolder */
+            color: #00373a;
+            letter-spacing: -0.5px; /* Expressive typography */
+        }
+        .material-label { font-size: 0.875rem; color: #3f4849; margin-bottom: 0.25rem; display: block; }
+        .material-value { font-size: 1.75rem; font-weight: 700; color: #00696e; }
+
+        /* --- Buttons --- */
+        .material-button-filled {
+            font-family: inherit; font-size: 1rem; font-weight: 700; background-color: #00696e; color: #ffffff; border-radius: 9999px;
+            padding: 0.85rem 1.75rem; /* More padding */
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); /* Expressive bounce */
+            border: none; cursor: pointer;
+            background-image: linear-gradient(to top, rgba(255,255,255,0), rgba(255,255,255,0.1));
+        }
+        .material-button-filled:hover {
+            box-shadow: 0 6px 16px rgba(0, 105, 110, 0.3);
+            transform: translateY(-3px) scale(1.02);
+        }
+        .material-button-filled:active {
+            transform: translateY(-1px) scale(0.98);
+        }
+        .material-button-filled:disabled { background-color: #a2a2a2; color: #e0e0e0; cursor: not-allowed; box-shadow: none; transform: none;}
+
+        .material-button-outlined {
+            font-family: inherit; font-size: 1rem; font-weight: 600; background-color: transparent; color: #00696e; border-radius: 9999px;
+            padding: 0.85rem 1.75rem; transition: all 0.2s ease-in-out; border: 2px solid #5d797a; cursor: pointer;
+        }
+        .material-button-outlined:hover { background-color: rgba(0, 105, 110, 0.08); border-color: #00696e;}
+        
+        .material-button-text {
+            font-family: inherit; font-size: 1rem; font-weight: 600; color: #00696e; border-radius: 9999px;
+            padding: 0.5rem 1rem; transition: background-color 0.2s; border: none; cursor: pointer;
+        }
+        .material-button-text:hover { background-color: rgba(0, 105, 110, 0.08); }
+
+        /* --- Input Fields --- */
+        .material-input-container { position: relative; }
+        .material-input {
+            width: 100%; border: 2px solid #6f797a; background-color: transparent; border-radius: 12px 12px 4px 4px; /* Expressive Shape */
+            padding: 1rem; font-size: 1.125rem; color: #191c1d; transition: all 0.2s ease;
+        }
+        .material-input:focus, .material-input:not(:placeholder-shown) {
+             border-color: #00696e;
+             outline: none;
+             box-shadow: 0 0 0 2px rgba(0, 105, 110, 0.2), inset 0 2px 4px rgba(0,0,0,0.05); /* Dynamic Fill */
+        }
+        .material-input-label {
+            position: absolute; top: 1rem; left: 1rem; background-color: #fdfdff; padding: 0 0.25rem;
+            color: #3f4849; transition: all 0.2s ease; pointer-events: none;
+        }
+        .lang-fa-container .material-input-label { right: 1rem; left: auto; }
+        .peer:focus ~ .material-input-label,
+        .peer:not(:placeholder-shown) ~ .material-input-label {
+            top: -0.65rem; font-size: 0.875rem; color: #00696e;
+        }
+        .lang-en-container .peer:focus ~ .material-input-label,
+        .lang-en-container .peer:not(:placeholder-shown) ~ .material-input-label { left: 0.75rem; }
+        .lang-fa-container .peer:focus ~ .material-input-label,
+        .lang-fa-container .peer:not(:placeholder-shown) ~ .material-input-label { right: 0.75rem; }
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        /* --- Supply Chain Map --- */
+        .material-map-node {
+            background-color: #cfe8e9; color: #002022; padding: 0.75rem 1.25rem; border-radius: 9999px;
+            display: flex; align-items: center; gap: 0.5rem; font-weight: 600; transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .material-map-node.active {
+            background-color: #00696e; color: #ffffff; transform: scale(1.05); box-shadow: 0 0 15px rgba(0, 105, 110, 0.3);
+            border: 2px solid #ffffff;
+        }
+        .material-icon { width: 2.5em; height: 2.5em; }
+        .material-map-connector { flex-grow: 1; height: 3px; background-color: #b9c8c9; margin: 0 0.5rem; position: relative; }
+        
+        /* --- Inventory & Trucks --- */
+        .inventory-visual-area {
+            position: relative; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 4px;
+            overflow: hidden; /* MODIFIED: Prevent visual overflows */
+            background-color: rgba(0, 105, 110, 0.05); border-radius: 12px;
+            padding: 8px; 
+            border: 1px solid #b9c8c9; /* MODIFIED: Made border more visible */
+            min-height: 70px; 
+            margin-top: 1rem;
+            transition: all 0.3s ease-in-out; /* ADDED: Smooth transition for scaling */
+        }
+        .inventory-item { width: 1.5rem; height: 1.5rem; }
+        .truck-icon-container { position: relative; text-align: center; transition: all 0.3s ease-in-out; }
+        .truck-icon { 
+            width: 2.5rem;
+            height: 2.5rem;
+            transition: all 0.3s ease;
+            display: inline-block; /* Ensure transform works correctly */
+        }
+        .truck-quantity {
+            position: absolute; top: -1rem; left: 50%; transform: translateX(-50%);
+            font-size: 0.75rem; font-weight: 600; background-color: #5d797a;
+            color: white; padding: 2px 6px; border-radius: 9999px;
+            transition: all 0.3s ease-in-out;
+        }
+        .truck-icon-container.active .truck-quantity { background-color: #00696e; }
+
+        /* --- Animations & Transitions --- */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        
+        @keyframes number-flash {
+            0%, 100% { background-color: transparent; }
+            50% { background-color: rgba(0, 105, 110, 0.1); }
+        }
+        .number-update { display: inline-block; padding: 0 2px; border-radius: 4px; transition: color 0.3s ease, transform 0.3s ease, background-color 0.3s ease; }
+        .number-updated { animation: number-flash 0.6s ease-out; color: #00696e; transform: scale(1.1); }
+        
+        @keyframes truck-container-bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+        .truck-icon-container.active {
+             animation: truck-container-bounce 1.5s infinite ease-in-out;
+        }
+        .lang-en-container .truck-icon { transform: scaleX(1); } /* Points right */
+        .lang-fa-container .truck-icon { transform: scaleX(-1); } /* Flips to point left */
+
+        /* --- Toast Notification --- */
+        .toast-notification {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 12px 24px;
+            border-radius: 8px; color: white; font-weight: 600; z-index: 2000; opacity: 0;
+            transition: opacity 0.5s, transform 0.5s; pointer-events: none;
+        }
+        .toast-notification.show { opacity: 1; transform: translate(-50%, -10px); }
+
+        /* --- Responsive Adjustments for Desktop --- */
+        @media (min-width: 1024px) { /* Changed from md (768px) to lg for better spacing */
+            .material-map-node {
+                flex-direction: column; /* Stack icon and text vertically */
+                padding: 0.75rem 1rem; /* More padding to prevent text overlap */
+                gap: 0.25rem;
+                text-align: center;
+            }
+            .material-icon {
+                width: 3em;
+                height: 3em;
+            }
+            .truck-icon {
+                width: 3rem;
+                height: 3rem;
+            }
+            .truck-quantity {
+                top: -0.75rem;
+            }
+            .material-map-connector {
+                margin: 0 0.5rem; 
+                align-self: center; /* Center connector with the taller node */
+            }
+        }
+        
+    </style>
+</head>
+<body>
+
+    <!-- Language Selection Screen -->
+    <div id="language-selection-screen" class="main-content-area flex items-center justify-center fade-in p-4" style="background-color: #f8fafc; background-image: url(&quot;data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23dbe4e6' stroke-width='1'%3E%3Cpath d='M25 0 v100 M75 0 v100 M0 25 h100 M0 75 h100' /%3E%3Cpath d='M20 22 l5 3 l-5 3' stroke-width='2'/%3E%3Cpath d='M70 72 l5 3 l-5 3' stroke-width='2'/%3E%3C/g%3E%3C/svg%3E&quot;);">
+        <div class="max-w-md w-full mx-auto material-card p-6 sm:p-8 text-center relative">
+            <!-- Logo: Bullwhip Effect -->
+            <div class="flex justify-center mb-4">
+                <svg width="120" height="100" viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <filter id="shadow-logo" x="-20%" y="-20%" width="140%" height="140%">
+                            <feDropShadow dx="1" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.15"/>
+                        </filter>
+                    </defs>
+                    <g fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#shadow-logo)">
+                        <!-- Waves representing demand amplification -->
+                        <path d="M 10,50 Q 25,60 40,50 T 70,50 T 100,50 T 130,50" stroke="#b9c8c9" stroke-width="4"/>
+                        <path d="M 10,50 Q 25,65 40,50 T 70,50 T 100,50 T 130,50" stroke="#5d797a" stroke-width="4"/>
+                        <path d="M 10,50 Q 25,75 40,50 T 70,50 T 100,50 T 130,50" stroke="#00696e" stroke-width="4"/>
+                        <path d="M 10,50 Q 25,85 40,50 T 70,50 T 100,50 T 130,50" stroke="#00373a" stroke-width="4"/>
+                        <!-- Start and End Points -->
+                        <circle cx="10" cy="50" r="6" fill="#00696e" stroke="white" stroke-width="2"/>
+                        <rect x="105" y="45" width="10" height="10" fill="#00373a" stroke="white" stroke-width="2"/>
+                    </g>
+                </svg>
+            </div>
+            
+            <h1 style="font-family: 'Roboto', sans-serif; font-weight: 900;" class="text-4xl sm:text-5xl text-slate-900 tracking-tight">Beer Game</h1>
+            <h2 style="font-family: 'Roboto', sans-serif; font-weight: 400;" class="text-2xl text-slate-600 mt-1">Supply Chain Simulation</h2>
+            
+            <h2 class="text-xl font-bold text-slate-600 mt-4" style="font-family: 'Vazirmatn', sans-serif;">شبیه ساز زنجیره تامین</h2>
+            
+            <div class="flex flex-col sm:flex-row gap-4 mt-8">
+                <button id="select-lang-en" class="w-full material-button-filled">English</button>
+                <button id="select-lang-fa" class="w-full material-button-outlined" style="font-family: 'Vazirmatn', sans-serif;">فارسی (Persian)</button>
+            </div>
+            
+            <div class="mt-8 text-xs text-slate-400 text-center normal-case leading-relaxed">
+                <p>© 2025 Ali Amirkhani. Beer Game Supply chain simulation — Designed & Developed by Ali Amirkhani, released under the MIT License. Includes components © 2017–2023 W.Y. (MIT License), Tailwind CSS © Tailwind Labs, Inc. (MIT License).</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- English Game Version -->
+    <div id="game-container-en" class="hidden lang-en-container main-content-area"></div>
+
+    <!-- Persian Game Version -->
+    <div id="game-container-fa" class="hidden lang-fa-container main-content-area"></div>
+    
+    <script>
+    function initializeGame(lang) {
+        const API_BASE_URL = './admin.php';
+
+        const UIElements = {
+            container: document.getElementById(`game-container-${lang}`),
+        };
+
+        const roles = ['Factory', 'Distributor', 'Wholesaler', 'Retailer'];
+
+        const ICONS = {
+            Factory: `<svg viewBox="0 0 64 64" class="material-icon"><g filter="url(#realistic-shadow)"><path d="M12 50 V 25 l12-7 h16 l12 7 v25 H12 Z" fill="#BDBDBD"/><path d="M12 25 L 24 18 H 40 L 52 25" fill="none" stroke="#9E9E9E" stroke-width="1"/><path d="M12 50 L 52 50 L 48 54 H 16 Z" fill="#757575"/><path d="M24 18 L 32 14 L 40 18" fill="#EEEEEE" stroke="#BDBDBD"/><path d="M18 30h8v8h-8z M28 30h8v8h-8z M38 30h8v8h-8z" fill="rgba(0,0,0,0.2)"/></g></svg>`,
+            Distributor: `<svg viewBox="0 0 64 64" class="material-icon"><g filter="url(#realistic-shadow)"><path d="M10 44 V 24 a2 2 0 0 1 2-2 H 38 V 44 H 10 Z" fill="url(#truck-body-grad)"/><path d="M38 44 V 28 H 48 L 54 34 V 44 H 38 Z" fill="#E0E0E0"/><path d="M40 30 H 46 L 50 34 V 38 H 40 Z" fill="url(#window-grad)" stroke="#90A4AE"/><path d="M16 48 a5 5 0 1 0 0-10 5 5 0 0 0 0 10z m24 0 a5 5 0 1 0 0-10 5 5 0 0 0 0 10z" fill="#424242"/><path d="M16 48 a2 2 0 1 0 0-4 2 2 0 0 0 0 4z m24 0 a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" fill="#9E9E9E"/></g></svg>`,
+            Wholesaler: `<svg viewBox="0 0 64 64" class="material-icon"><g filter="url(#realistic-shadow)"><path d="M14 26 l18-8 18 8 v20 l-18 8 -18-8 z" fill="#D2B48C"/><path d="M14 26 L32 34 L50 26 M32 34 V 54" fill="none" stroke="#A0522D" stroke-width="1.5"/><path d="M14 26 L32 18 L 50 26" fill="none" stroke="#8B4513" stroke-width="1"/><rect x="22" y="30" width="20" height="4" fill="rgba(255,255,255,0.5)" rx="1"/></g></svg>`,
+            Retailer: `<svg viewBox="0 0 64 64" class="material-icon"><g filter="url(#realistic-shadow)"><path d="M12 52 V 28 h40 v24 z" fill="#F5F5F5"/><path d="M10 28 h44 L32 16 z" fill="url(#awning-grad)"/><rect x="22" y="34" width="20" height="18" fill="url(#window-grad)" stroke="#B0BEC5"/><line x1="22" y1="43" x2="42" y2="43" stroke="#B0BEC5"/><line x1="32" y1="34" x2="32" y2="52" stroke="#B0BEC5"/></g></svg>`,
+            Truck: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" class="truck-icon"><g filter="url(#realistic-shadow)"><path d="M10 44 V 24 a2 2 0 0 1 2-2 H 38 V 44 H 10 Z" fill="url(#truck-body-grad)"/><path d="M38 44 V 28 H 48 L 54 34 V 44 H 38 Z" fill="#E0E0E0"/><path d="M40 30 H 46 L 50 34 V 38 H 40 Z" fill="url(#window-grad)" stroke="#90A4AE"/><path d="M16 48 a5 5 0 1 0 0-10 5 5 0 0 0 0 10z m24 0 a5 5 0 1 0 0-10 5 5 0 0 0 0 10z" fill="#424242"/><path d="M16 48 a2 2 0 1 0 0-4 2 2 0 0 0 0 4z m24 0 a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" fill="#9E9E9E"/></g></svg>`,
+            Box: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" class="inventory-item"><g filter="url(#realistic-shadow)"><path d="M14 26 l18-8 18 8 v20 l-18 8 -18-8 z" fill="#D2B48C"/><path d="M14 26 L32 34 L50 26 M32 34 V 54" fill="none" stroke="#A0522D" stroke-width="1.5"/><path d="M14 26 L32 18 L 50 26" fill="none" stroke="#8B4513" stroke-width="1"/><rect x="22" y="30" width="20" height="4" fill="rgba(255,255,255,0.5)" rx="1"/></g></svg>`,
+            Unit: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" class="inventory-item"><g filter="url(#realistic-shadow)"><rect x="22" y="14" width="20" height="36" rx="4" fill="url(#can-grad)" stroke="#9E9E9E"/><rect x="22" y="24" width="20" height="16" fill="url(#can-label)"/><ellipse cx="32" cy="14" rx="10" ry="4" fill="#E0E0E0" stroke="#9E9E9E"/><ellipse cx="32" cy="50" rx="10" ry="4" fill="#E0E0E0" stroke="#9E9E9E"/></g></svg>`,
+            Inventory: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" class="w-10 h-10"><g filter="url(#realistic-shadow)"><path d="M14 26 l18-8 18 8 v20 l-18 8 -18-8 z" fill="#D2B48C"/><path d="M14 26 L32 34 L50 26 M32 34 V 54" fill="none" stroke="#A0522D" stroke-width="1.5"/><path d="M14 26 L32 18 L 50 26" fill="none" stroke="#8B4513" stroke-width="1"/><rect x="22" y="30" width="20" height="4" fill="rgba(255,255,255,0.5)" rx="1"/></g></svg>`,
+            Backlog: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" class="w-10 h-10"><g filter="url(#realistic-shadow)"><path d="M32 10 L 54 50 H 10 Z" fill="url(#backlog-grad)" stroke="#C76F17"/><path d="M30 24 v 12 h 4 v -12 z m0 16 v 4 h 4 v -4 z" fill="#FFFFFF"/></g></svg>`,
+            ArrivingNextWeek: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" class="w-10 h-10"><g filter="url(#realistic-shadow)"><path d="M10 44 V 24 a2 2 0 0 1 2-2 H 38 V 44 H 10 Z" fill="url(#truck-body-grad)"/><path d="M38 44 V 28 H 48 L 54 34 V 44 H 38 Z" fill="#E0E0E0"/><path d="M40 30 H 46 L 50 34 V 38 H 40 Z" fill="url(#window-grad)" stroke="#90A4AE"/><path d="M16 48 a5 5 0 1 0 0-10 5 5 0 0 0 0 10z m24 0 a5 5 0 1 0 0-10 5 5 0 0 0 0 10z" fill="#424242"/><path d="M16 48 a2 2 0 1 0 0-4 2 2 0 0 0 0 4z m24 0 a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" fill="#9E9E9E"/></g></svg>`,
+            WeeklyCost: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" class="w-10 h-10"><g filter="url(#realistic-shadow)"><ellipse cx="32" cy="46" rx="14" ry="6" fill="#FFB300" stroke="#E6A100"/><ellipse cx="32" cy="44" rx="14" ry="6" fill="url(#coin-grad)" stroke="#E6A100"/><ellipse cx="32" cy="36" rx="14" ry="6" fill="url(#coin-grad)" stroke="#E6A100"/><ellipse cx="32" cy="28" rx="14" ry="6" fill="url(#coin-grad)" stroke="#E6A100"/><text x="32" y="33" font-family="sans-serif" font-size="10" font-weight="bold" fill="#B38600" text-anchor="middle">$</text></g></svg>`,
+            Outgoing: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" class="w-10 h-10"><g filter="url(#realistic-shadow)"><path d="M14 30 l18-8 18 8 v20 l-18 8 -18-8 z" fill="#D2B48C"/><path d="M24 20 L 32 12 L 40 20 V 32 L 32 38 L 24 32 Z" fill="url(#outgoing-arrow-grad)" stroke="#558B2F"/><path d="M32 16 v 14 m -4 -4 l 4 -4 l 4 4" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/></g></svg>`,
+            TotalCost: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" class="w-10 h-10"><g filter="url(#realistic-shadow)"><path d="M18 16 C 18 12 24 8 32 8 s 14 4 14 12 h -4 C 42 14 38 12 32 12 s -10 2 -10 4 Z" fill="#D7CCC8"/><path d="M18 16 C 14 20 12 28 12 34 C 12 48 20 56 32 56 s 20 -8 20 -22 c 0 -6 -2 -14 -6 -18" fill="url(#bag-grad)" stroke="#5D4037"/><text x="32" y="42" font-family="serif" font-size="24" font-weight="bold" fill="#FFEB3B" text-anchor="middle">$</text></g></svg>`,
+            Sanctions: `<svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 flex-shrink-0" viewBox="0 0 64 64"><g filter="url(#realistic-shadow)"><path d="M32 8 L 12 18 V 34 C 12 48 20 54 32 58 C 44 54 52 48 52 34 V 18 Z" fill="#607D8B"/><path d="M28 24 h8 v18 h-8 z m0 -6 h8 v4 h-8 z" fill="#FFFFFF"/></g></svg>`,
+            Tariffs: `<svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 flex-shrink-0" viewBox="0 0 64 64"><g filter="url(#realistic-shadow)"><rect x="12" y="10" width="40" height="44" rx="4" fill="#7986CB" stroke="#3F51B5"/><rect x="18" y="16" width="28" height="4" fill="#FFFFFF"/><rect x="18" y="24" width="28" height="4" fill="#FFFFFF"/><rect x="18" y="32" width="20" height="4" fill="#FFFFFF"/></g></svg>`,
+            HowToPlay: `<svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 flex-shrink-0" viewBox="0 0 64 64"><g filter="url(#realistic-shadow)"><path d="M14 10 H 46 a 4 4 0 0 1 4 4 V 50 a 4 4 0 0 1 -4 4 H 14 a 4 4 0 0 1 -4 -4 V 14 a 4 4 0 0 1 4 -4 Z" fill="#A1887F"/><rect x="16" y="16" width="28" height="32" fill="#FFF8E1"/><path d="M20 22h20 M20 28h20 M20 34h12" stroke="#000000" stroke-width="2" stroke-linecap="round"/></g></svg>`,
+            EnterName: `<svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10" viewBox="0 0 64 64"><g filter="url(#realistic-shadow)"><rect x="10" y="14" width="44" height="36" rx="4" fill="#B0BEC5"/><circle cx="24" cy="28" r="6" fill="#78909C"/><path d="M18 38 a 6 12 0 0 1 12 0" fill="#78909C"/><rect x="34" y="24" width="14" height="3" fill="#78909C"/><rect x="34" y="31" width="14" height="3" fill="#78909C"/></g></svg>`,
+            GeoEffects: `<svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10" viewBox="0 0 64 64"><g filter="url(#realistic-shadow)"><circle cx="32" cy="32" r="24" fill="url(#globe-grad)"/><path d="M32 8 C 40 16, 40 24, 32 32 C 24 40, 24 48, 32 56 M8 32 C 16 24, 24 24, 32 32 C 40 40, 48 40, 56 32" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/><path d="M22,38 C30,42 34,42 42,38 M20,26 C28,22 36,22 44,26" fill="none" stroke="rgba(0,0,0,0.2)" stroke-width="1"/></g></svg>`,
+            ChooseRole: `<svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10" viewBox="0 0 64 64"><g filter="url(#realistic-shadow)"><circle cx="24" cy="24" r="6" fill="#78909C"/><path d="M18 34 a 6 12 0 0 1 12 0" fill="#78909C"/><path d="M36 28 L 42 34 L 50 24" stroke="#4CAF50" stroke-width="4" stroke-linecap="round" fill="none"/></g></svg>`
+        };
+        
+        let playerRole = '';
+        let playerName = '';
+        let currentWeek = 0;
+        const totalWeeks = 25;
+        let sanctionsActive = false;
+        let tariffsActive = false;
+        const gameState = {};
+        let performanceChart = null; // Variable to hold the chart instance
+        const TARGET_INVENTORY = 15;
+        const AI_ADJUSTMENT_STRENGTH = 0.5;
+        const TARIFF_RATE = 0.25;
+        const UNIT_COST = 8;
+        const currencyPrefix = lang === 'fa' ? '' : '$';
+        const currencySuffix = lang === 'fa' ? ' <span style="font-family: \'Vazirmatn\', sans-serif;">تومان</span>' : '';
+        let adminPassword = null; 
+        let allFetchedReports = [];
+
+        const langData = {
+            en: {
+                gameTitle: "Beer Game Supply chain simulation", player: "Player", role: "Role", endGame: "End Game", week: "Week", 
+                nextWeek: "Next Week", customerDemand: "Customer Demand",
+                simulationComplete: "Simulation Complete",
+                simulationCompleteDesc: "You have successfully completed the 25-week simulation. Your report has been saved to the server.",
+                ok: "OK",
+                yourRole: "Your Role", totalCost: "Total Supply Chain Cost", playAgain: "Play Again", 
+                adminAccess: "Admin Access", adminPasswordPrompt: "Please enter the admin password to view reports.", 
+                password: "Password", incorrectPassword: "Incorrect password. Please try again.", cancel: "Cancel", 
+                submit: "Submit", invalidAction: "Invalid Action", inventory: "Inventory", backlog: "Backlog", 
+                shippingPipeline: "Shipping Pipeline", arrivingNextWeek: "Arriving Next Week", weeklyCost: "Weekly Cost", 
+                totalCostHeader: "Total Cost", productionOrder: "Start Production", placeOrder: "Place Your Order", 
+                orderPlaceholder: "e.g., 8", adminPanelTitle: "Admin Panel: Game Reports", back: "Back", 
+                loadingReports: "Loading reports from server...", noReports: "No game reports found on the server.", date: "Date", 
+                downloadCSV: "Download CSV", gameSettings: "Game Settings", playerName: "Player Name", 
+                sanctionsEnabled: "Sanctions Enabled", tariffsEnabled: "Tariffs Enabled", yes: "Yes", no: "No", 
+                order: "Order", incoming: "Incoming", errorEnterName: "Please enter a name to start the game.", 
+                errorInvalidOrder: "Please enter a valid, non-negative number for your order.",
+                errorInvalidName: "Please use only letters and spaces in your name.",
+                roleFactory: "Factory", roleDistributor: "Distributor", roleWholesaler: "Wholesaler", roleRetailer: "Retailer",
+                selectAll: "Select All", deleteSelected: "Delete Selected",
+                confirmDelete: "Are you sure you want to delete the selected reports from the server?",
+                noReportsSelected: "No reports selected for deletion.", delete: "Delete",
+                errorServer: "Could not connect to the server. Please check your internet connection and the server script.",
+                downloadSelectedZip: "Download Selected as ZIP",
+                noReportsSelectedZip: "No reports selected for download.",
+                reportSavedOnline: "Your game data has been saved to the server.",
+                reportSavedLocally: "Game report could not be saved to server. Check connection.",
+                outgoing: "Outgoing",
+                howToPlay: "How to Play",
+                howToPlayDesc: "Welcome to the supply chain! Your goal is to keep costs low. Each week, you'll ship goods and order more to restock. Inventory costs $0.50 per unit, while backlogs (unfulfilled orders) cost $1.00. Smart ordering is key to winning!",
+                enterYourName: "1. Enter Your Name",
+                geopoliticalEffects: "2. Geopolitical Effects",
+                sanctions: "Sanctions",
+                sanctionsDesc: "Adds a +1 week shipping delay and a +25% cost to all incoming shipments (except Factory), simulating trade restrictions.",
+                tariffs: "Tariffs",
+                tariffsDesc: "Adds a +25% cost to every order you place, simulating import taxes that increase your operational expenses.",
+                chooseYourRole: "3. Choose Your Role",
+                playGame: "Play Game",
+                adminPanel: "Admin Panel",
+                dashboard: "Dashboard",
+                totalCostToDate: "Total Cost-to-Date",
+                currentWeek: "Current Week",
+                chartTitle: "Performance Trend (Last 10 Weeks)",
+                chartInventory: "Inventory",
+                chartBacklog: "Backlog",
+                chartDemand: "Incoming Demand",
+                chartYourOrder: "Your Placed Order"
+            },
+            fa: {
+                gameTitle: "شبیه ساز زنجیره تامین", player: "بازیکن", role: "نقش", endGame: "پایان بازی", week: "هفته", 
+                nextWeek: "هفته بعد", customerDemand: "تقاضای مشتری",
+                simulationComplete: "شبیه‌سازی کامل شد",
+                simulationCompleteDesc: "شما شبیه‌سازی ۲۵ هفته‌ای را با موفقیت به پایان رساندید. گزارش شما در سرور ذخیره شد.",
+                ok: "باشه",
+                yourRole: "نقش شما", totalCost: "هزیه کل زنجیره تأمین", playAgain: "بازی دوباره", 
+                adminAccess: "دسترسی ادمین", adminPasswordPrompt: "لطفاً برای مشاهده گزارش‌ها رمز عبور ادمین را وارد کنید.", 
+                password: "رمز عبور", incorrectPassword: "رمز عبور اشتباه است. لطفاً دوباره تلاش کنید.", cancel: "لغو", 
+                submit: "تأیید", invalidAction: "عملیات نامعتبر", inventory: "موجودی", backlog: "کسری", 
+                shippingPipeline: "محموله‌های در راه", arrivingNextWeek: "ورودی هفته آینده", weeklyCost: "هزینه هفتگی", 
+                totalCostHeader: "هزینه کل", productionOrder: "شروع تولید", placeOrder: "ثبت سفارش", 
+                orderPlaceholder: "مثال: ۸", adminPanelTitle: "پنل ادمین: گزارش‌های بازی", back: "بازگشت", 
+                loadingReports: "در حال بارگذاری گزارش‌ها از سرور...", noReports: "هیچ گزارشی در سرور یافت نشد.", date: "تاریخ", 
+                downloadCSV: "دانلود CSV", gameSettings: "تنظیمات بازی", playerName: "نام بازیکن", 
+                sanctionsEnabled: "تحریم‌ها فعال", tariffsEnabled: "تعرفه‌ها فعال", yes: "بله", no: "خیر", 
+                order: "سفارش", incoming: "ورودی", errorEnterName: "لطفا برای شروع بازی یک نام وارد کنید.", 
+                errorInvalidOrder: "لطفا یک عدد معتبر و غیرمنفی برای سفارش خود وارد کنید.",
+                errorInvalidName: "لطفا در نام خود فقط از حروف و فاصله استفاده کنید.",
+                roleFactory: "کارخانه", roleDistributor: "توزیع‌کننده", roleWholesaler: "عمده‌فروش", roleRetailer: "خرده‌فروش",
+                selectAll: "انتخاب همه", deleteSelected: "حذف موارد انتخابی",
+                confirmDelete: "آیا از حذف گزارش‌های انتخاب شده از سرور مطمئن هستید؟",
+                noReportsSelected: "هیچ گزارشی برای حذف انتخاب نشده است.", delete: "حذف",
+                errorServer: "امکان اتصال به سرور وجود ندارد. لطفا اتصال اینترنت و اسکریپت سرور را بررسی کنید.",
+                downloadSelectedZip: "دانلود منتخب به صورت ZIP",
+                noReportsSelectedZip: "هیچ گزارشی برای دانلود انتخاب نشده است.",
+                reportSavedOnline: "اطلاعات بازی شما در سرور ذخیره شد.",
+                reportSavedLocally: "امکان ذخیره گزارش در سرور وجود نداشت. اتصال را بررسی کنید.",
+                outgoing: "ارسالی",
+                howToPlay: "راهنمای بازی",
+                howToPlayDesc: "به زنجیره تامین خوش آمدید! هدف شما پایین نگه داشتن هزینه‌هاست. هر هفته، کالا ارسال می‌کنید و برای پر کردن انبار سفارش جدید می‌دهید. هزینه موجودی ۵۰۰ تومان و هزینه کسری ۱۰۰۰ تومان است. سفارش هوشمندانه کلید پیروزی است!",
+                enterYourName: "۱. نام خود را وارد کنید",
+                geopoliticalEffects: "۲. اثرات ژئوپلیتیکی",
+                sanctions: "تحریم‌ها",
+                sanctionsDesc: "با شبیه‌سازی محدودیت‌های تجاری، یک هفته تأخیر در ارسال و ۲۵٪ هزینه به تمام محموله‌های ورودی (به جز کارخانه) اضافه می‌کند.",
+                tariffs: "تعرفه‌ها",
+                tariffsDesc: "با شبیه‌سازی مالیات واردات، ۲۵٪ هزینه به ارزش هر سفارشی که ثبت می‌کنید اضافه کرده و هزینه‌های عملیاتی شما را افزایش می‌دهد.",
+                chooseYourRole: "۳. نقش خود را انتخاب کنید",
+                playGame: "شروع بازی",
+                adminPanel: "پنل ادمین",
+                dashboard: "داشبورد",
+                totalCostToDate: "هزینه کل تا امروز",
+                currentWeek: "هفته جاری",
+                chartTitle: "روند عملکرد (۱۰ هفته اخیر)",
+                chartInventory: "موجودی",
+                chartBacklog: "کسری",
+                chartDemand: "تقاضای ورودی",
+                chartYourOrder: "سفارش شما"
+            }
+        };
+        const i18n = langData[lang];
+
+        function createStartScreen() {
+            const roleSelectionHTML = roles.map(role => `
+                <label class="p-4 border-2 rounded-2xl text-center cursor-pointer transition-all has-[:checked]:bg-cyan-50 has-[:checked]:border-cyan-700 has-[:checked]:scale-105">
+                    <input type="radio" name="role-${lang}" value="${role}" class="sr-only" ${role === 'Factory' ? 'checked' : ''}>
+                    <span class="flex justify-center">${ICONS[role]}</span>
+                    <span class="block font-semibold mt-2">${i18n['role'+role]}</span>
+                </label>
+            `).join('');
+
+            const sanctionsToggleHTML = `
+                <div class="flex items-start gap-3">
+                    ${ICONS.Sanctions}
+                    <div class="flex-grow">
+                        <div class="flex items-center justify-between">
+                            <label for="sanctions-toggle-${lang}" class="font-bold text-slate-800 cursor-pointer">${i18n.sanctions}</label>
+                            <div class="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
+                                <input type="checkbox" id="sanctions-toggle-${lang}" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                <label for="sanctions-toggle-${lang}" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">${i18n.sanctionsDesc}</p>
+                    </div>
+                </div>`;
+            
+            const tariffsToggleHTML = `
+                <div class="flex items-start gap-3">
+                    ${ICONS.Tariffs}
+                    <div class="flex-grow">
+                        <div class="flex items-center justify-between">
+                            <label for="tariffs-toggle-${lang}" class="font-bold text-slate-800 cursor-pointer">${i18n.tariffs}</label>
+                            <div class="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
+                                <input type="checkbox" id="tariffs-toggle-${lang}" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                <label for="tariffs-toggle-${lang}" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">${i18n.tariffsDesc}</p>
+                    </div>
+                </div>`;
+
+            const toggleCSS = `
+                .toggle-checkbox:checked { 
+                    right: 0; 
+                    border-color: #00696e; 
+                } 
+                .toggle-checkbox:checked + .toggle-label { 
+                    background-color: #00696e; 
+                }
+                .lang-fa-container .toggle-checkbox:checked {
+                    right: auto;
+                    left: 0;
+                }
+            `;
+            const styleSheet = document.createElement("style");
+            styleSheet.innerText = toggleCSS;
+            document.head.appendChild(styleSheet);
+
+
+            const html = `
+            <div id="start-screen-${lang}" class="max-w-3xl w-full mx-auto space-y-4 p-4 flex-grow justify-center flex flex-col">
+                <div class="relative text-center pt-8">
+                     <button id="back-to-lang-${lang}" class="material-button-text !px-4 !py-2 !text-sm absolute top-0 ${lang === 'fa' ? 'left-0' : 'right-0'}">${lang === 'fa' ? 'تغییر زبان →' : '← Change Language'}</button>
+                    <h1 class="text-3xl sm:text-4xl font-bold text-slate-900">${i18n.gameTitle}</h1>
+                </div>
+
+                <div class="material-card p-4 sm:p-6 flex items-start gap-4">
+                    ${ICONS.HowToPlay}
+                    <div>
+                        <h2 class="material-headline mb-2">${i18n.howToPlay}</h2>
+                        <p class="text-sm sm:text-base text-slate-600">${i18n.howToPlayDesc}</p>
+                    </div>
+                </div>
+                
+                <div class="material-card p-4 sm:p-6 space-y-4">
+                    <div>
+                        <h3 class="font-bold text-lg mb-2 flex items-center gap-2">${ICONS.EnterName} ${i18n.enterYourName}</h3>
+                        <div class="material-input-container">
+                            <input type="text" id="player-name-input-${lang}" placeholder=" " class="material-input peer">
+                            <label for="player-name-input-${lang}" class="material-input-label">${i18n.playerName}</label>
+                        </div>
+                    </div>
+                    <div>
+                         <h3 class="font-bold text-lg mb-2 flex items-center gap-2">${ICONS.GeoEffects} ${i18n.geopoliticalEffects}</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="p-4 bg-slate-100 rounded-xl">${sanctionsToggleHTML}</div>
+                            <div class="p-4 bg-slate-100 rounded-xl">${tariffsToggleHTML}</div>
+                        </div>
+                    </div>
+                    <div>
+                         <h3 class="font-bold text-lg mb-2 flex items-center gap-2">${ICONS.ChooseRole} ${i18n.chooseYourRole}</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">${roleSelectionHTML}</div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row items-center justify-center gap-4 pt-2">
+                    <button id="start-game-btn-${lang}" class="w-full md:w-auto material-button-filled">${i18n.playGame}</button>
+                    <button id="show-admin-panel-btn-${lang}" class="w-full md:w-auto material-button-outlined">${i18n.adminPanel}</button>
+                </div>
+            </div>
+            `;
+            UIElements.container.innerHTML = html;
+        }
+
+        function createMainInterface() {
+             const mapHTML = (isMobile) => roles.map((role, index) => `
+                <div id="map-role-${isMobile ? 'mobile-' : ''}${lang}-${role}" class="material-map-node text-xs sm:text-base">
+                    ${ICONS[role]}
+                    <span class="inline">${i18n['role'+role]}</span>
+                </div>
+                ${index < roles.length - 1 ? `<div id="connector-${isMobile ? 'mobile-' : ''}${lang}-${role}" class="material-map-connector ${isMobile ? 'w-1 flex-grow-0' : ''}"></div>` : ''}
+            `).join('');
+
+            const html = `
+                <div id="toast-notification-${lang}" class="toast-notification"></div>
+                <div id="game-interface-${lang}" class="hidden max-w-7xl h-full w-full mx-auto p-2 sm:p-4 flex flex-col gap-2 sm:gap-4">
+                    <header class="flex flex-wrap flex-row justify-between items-center gap-2 flex-shrink-0">
+                        <div>
+                            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900">${i18n.gameTitle}</h1>
+                            <p class="text-sm sm:text-base text-slate-600">${i18n.player}: <span id="player-name-display-${lang}" class="font-bold"></span> | ${i18n.role}: <span id="player-role-${lang}" class="font-bold text-cyan-700"></span></p>
+                        </div>
+                        <button id="end-game-btn-${lang}" type="button" class="material-button-outlined">${i18n.endGame}</button>
+                    </header>
+                    
+                    <div class="material-card p-2 sm:p-4 hidden md:block flex-shrink-0"><div class="flex items-center w-full">${mapHTML(false)}</div></div>
+                    <div class="material-card p-2 sm:p-4 md:hidden flex-shrink-0"><div class="flex flex-col items-center w-full gap-y-2">${mapHTML(true)}</div></div>
+
+                    <div id="game-board-${lang}" class="flex-grow min-h-0"></div>
+
+                    <div class="material-card p-4 flex flex-col sm:flex-row justify-center sm:justify-between items-center gap-4 flex-wrap flex-shrink-0">
+                        <div class="flex items-center gap-2 sm:gap-4">
+                            <button id="next-week-btn-${lang}" class="material-button-filled !px-6 !py-3">${i18n.nextWeek}</button>
+                        </div>
+                        <div class="flex items-center gap-4 sm:gap-8 flex-wrap justify-center">
+                             <div class="text-center">
+                                <span class="material-label">${i18n.customerDemand}</span>
+                                <span id="customer-demand-${lang}" class="text-xl sm:text-2xl font-bold number-update">4</span>
+                            </div>
+                            <div class="text-center">
+                                 <span class="material-label">${i18n.currentWeek}</span>
+                                 <span id="current-week-display-${lang}" class="text-xl sm:text-2xl font-bold">${currentWeek}/${totalWeeks}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            UIElements.container.innerHTML = html;
+        }
+        
+        function createModal(id, title, content, buttons) {
+            if (document.getElementById(id)) {
+                document.getElementById(id).remove();
+            }
+            const modal = document.createElement('div');
+            modal.id = id;
+            modal.className = 'fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4 fade-in hidden';
+            modal.innerHTML = `
+                <div class="material-card p-6 sm:p-8 w-full max-w-md space-y-6 no-hover">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">${title}</h2>
+                    <div>${content}</div>
+                    <div class="flex justify-end gap-2">${buttons}</div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            return modal;
+        }
+
+        function createGameBoard(isGameOver = false) {
+            UIElements.gameBoard.innerHTML = '';
+            const cardHTML = createRoleCardHTML(playerRole, true, true);
+            UIElements.gameBoard.innerHTML = cardHTML;
+        }
+        
+        function createRoleCardHTML(role, isPlayer, shouldShowData) {
+            const data = gameState[role] || { inventory: 0, backlog: 0, incoming: [0], cost: 0, totalCost: 0, outgoing: 0 };
+            
+            const inventoryStat = { label: i18n.inventory, value: data.inventory, id: `${role}-inventory-${lang}`, icon: ICONS.Inventory };
+            const backlogStat = { label: i18n.backlog, value: data.backlog, id: `${role}-backlog-${lang}`, icon: ICONS.Backlog };
+            const arrivingStat = { label: i18n.arrivingNextWeek, value: data.incoming[0] || 0, id: `${role}-incoming-val-${lang}`, icon: ICONS.ArrivingNextWeek };
+            const outgoingStat = { label: i18n.outgoing, value: data.outgoing, id: `${role}-outgoing-${lang}`, icon: ICONS.Outgoing };
+
+            const statToHTML = stat => `
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-full">
+                        ${stat.icon}
+                    </div>
+                    <div class="min-w-0">
+                        <span class="material-label truncate">${stat.label}</span>
+                        <span class="material-value number-update" id="${stat.id}">${stat.value}</span>
+                    </div>
+                </div>`;
+
+            const inputId = `${role}-order-${lang}`;
+            const orderLabel = role === 'Factory' ? i18n.productionOrder : i18n.placeOrder;
+
+            return `
+            <div id="${role}-card-${lang}" class="material-card h-full p-4 sm:p-6 flex flex-col ${isPlayer ? 'ring-2 ring-cyan-600' : ''}">
+                <h3 class="material-headline mb-4 flex-shrink-0">${i18n['role'+role]}</h3>
+                
+                <!-- Main content grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-grow min-h-0">
+                    
+                    <!-- Left Column: All stats & visual -->
+                    <div class="lg:col-span-1 space-y-4 flex flex-col">
+                        ${statToHTML(inventoryStat)}
+                        ${statToHTML(arrivingStat)}
+                        ${statToHTML(backlogStat)}
+                        ${statToHTML(outgoingStat)}
+                        <div class="flex-grow flex flex-col">
+                            <h4 class="text-sm font-bold text-slate-600 mb-2 mt-2">${i18n.inventory}</h4>
+                            <div id="${role}-inventory-visual-${lang}" class="inventory-visual-area flex-shrink-0 !mt-0 flex-grow"></div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Chart -->
+                    <div class="lg:col-span-2 flex flex-col min-h-[350px]">
+                         <h4 class="text-sm font-bold text-slate-600 mb-2">${i18n.chartTitle}</h4>
+                         <div class="relative flex-grow bg-slate-50 p-2 rounded-lg">
+                            <canvas id="performance-chart-canvas-${lang}"></canvas>
+                         </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-4 flex-shrink-0">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-full">
+                           ${ICONS.WeeklyCost}
+                        </div>
+                        <div>
+                            <span class="material-label">${i18n.weeklyCost}</span>
+                            <span class="material-value number-update">${currencyPrefix}<span id="${role}-cost-${lang}">${data.cost.toFixed(2)}</span>${currencySuffix}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-full">
+                           ${ICONS.TotalCost}
+                        </div>
+                        <div class="min-w-0">
+                            <span class="material-label truncate">${i18n.totalCostToDate}</span>
+                            <span class="text-xl sm:text-2xl font-bold text-slate-800 number-update">${currencyPrefix}<span id="${role}-total-cost-${lang}">${data.totalCost.toFixed(2)}</span>${currencySuffix}</span>
+                        </div>
+                    </div>
+                </div>
+                ${ isPlayer ? `
+                <div class="mt-auto pt-4 flex-shrink-0">
+                    <div class="material-input-container">
+                        <input type="number" id="${inputId}" placeholder=" " class="material-input peer" min="0" max="999999" value="4">
+                        <label for="${inputId}" class="material-input-label">${orderLabel}</label>
+                    </div>
+                </div>` : '' }
+            </div>`;
+        }
+        
+        function updateInventoryVisual(role, inventory) {
+            const visualContainer = document.getElementById(`${role}-inventory-visual-${lang}`);
+            if (!visualContainer) return;
+            visualContainer.innerHTML = ''; 
+            if (inventory > 100) {
+                visualContainer.innerHTML = `<div class="flex items-center justify-center w-full h-full text-2xl font-bold text-slate-700">${inventory}</div>`;
+                return;
+            }
+            const itemsPerBox = 10;
+            const numBoxes = Math.floor(inventory / itemsPerBox), singleUnits = inventory % itemsPerBox;
+            const fragment = document.createDocumentFragment();
+            for (let i = 0; i < numBoxes; i++) {
+                const boxContainer = document.createElement('div');
+                boxContainer.className = 'flex flex-col items-center -space-y-1';
+                
+                const boxIconDiv = document.createElement('div');
+                boxIconDiv.innerHTML = ICONS.Box;
+                
+                const numberLabel = document.createElement('span');
+                numberLabel.className = 'text-xs font-bold text-slate-600 bg-white/70 px-1 rounded-sm';
+                numberLabel.textContent = '10';
+                
+                boxContainer.appendChild(boxIconDiv);
+                boxContainer.appendChild(numberLabel);
+                fragment.appendChild(boxContainer);
+            }
+            for (let i = 0; i < singleUnits; i++) {
+                const item = document.createElement('div');
+                item.innerHTML = ICONS.Unit;
+                fragment.appendChild(item);
+            }
+            visualContainer.appendChild(fragment);
+        }
+
+        function updateNumberWithAnimation(elementOrId, newValue) {
+            const element = typeof elementOrId === 'string' ? document.getElementById(elementOrId) : elementOrId;
+            if (element && element.innerHTML != newValue) {
+                element.innerHTML = newValue;
+                element.classList.add('number-updated');
+                setTimeout(() => element.classList.remove('number-updated'), 600);
+            }
+        }
+        
+        function updateUI(revealAll = false) {
+            roles.forEach(role => {
+                const data = gameState[role];
+                if (!document.getElementById(`${role}-card-${lang}`)) return;
+
+                updateNumberWithAnimation(document.getElementById(`${role}-inventory-${lang}`), data.inventory);
+                updateInventoryVisual(role, data.inventory);
+                updateNumberWithAnimation(document.getElementById(`${role}-backlog-${lang}`), data.backlog);
+                updateNumberWithAnimation(document.getElementById(`${role}-outgoing-${lang}`), data.outgoing);
+
+                if (role === playerRole || revealAll) {
+                    const orderInput = document.getElementById(`${role}-order-${lang}`);
+                    if (orderInput && role !== playerRole) orderInput.value = gameState[role].orders[currentWeek] || 0;
+                    
+                    updateNumberWithAnimation(document.getElementById(`${role}-cost-${lang}`), data.cost.toFixed(2));
+                    updateNumberWithAnimation(document.getElementById(`${role}-total-cost-${lang}`), data.totalCost.toFixed(2));
+                    updateNumberWithAnimation(document.getElementById(`${role}-incoming-val-${lang}`), data.incoming[0] || 0);
+                }
+            });
+            
+            ['', 'mobile-'].forEach(prefix => {
+                roles.forEach(r => {
+                    const node = document.getElementById(`map-role-${prefix}${lang}-${r}`);
+                    if (node) node.classList.toggle('active', r === playerRole);
+                });
+
+                if (playerRole !== 'Factory') {
+                    const delay = gameState[playerRole].incoming.length;
+                    for (let i = 1; i <= delay; i++) {
+                        const truckQuantityEl = document.getElementById(`truck-quantity-${prefix}${lang}-${playerRole}-${i}`);
+                        if (truckQuantityEl) {
+                           updateNumberWithAnimation(truckQuantityEl, gameState[playerRole].incoming[i - 1] || 0);
+                           const container = truckQuantityEl.parentElement;
+                           if (container) container.classList.toggle('active', i === 1);
+                        }
+                    }
+                }
+            });
+            updateNumberWithAnimation(`customer-demand-${lang}`, gameState.customerDemandPattern[currentWeek] || 4);
+            updateNumberWithAnimation(`current-week-display-${lang}`, `${currentWeek}/${totalWeeks}`);
+        }
+        
+        function setupModals() {
+            UIElements.errorModal = createModal(`error-modal-${lang}`, i18n.invalidAction, `<p id="error-message-text-${lang}" class="text-slate-700"></p>`, `<button id="close-error-modal-btn-${lang}" class="material-button-filled">OK</button>`);
+            UIElements.errorMessageText = document.getElementById(`error-message-text-${lang}`);
+            document.getElementById(`close-error-modal-btn-${lang}`).addEventListener('click', hideError);
+        }
+
+        function startGame() {
+            playerName = UIElements.playerNameInput.value.trim();
+            // const nameRegex = /^[a-zA-Z\s\u0600-\u06FF\u067E\u0686\u06AF\u0698]+$/; // Validation removed to allow numbers and symbols
+            if (playerName === '') { showError("errorEnterName"); return; }
+            // if (!nameRegex.test(playerName)) { showError("errorInvalidName"); return; } // Validation removed
+            playerRole = document.querySelector(`input[name="role-${lang}"]:checked`).value;
+            sanctionsActive = document.getElementById(`sanctions-toggle-${lang}`).checked;
+            tariffsActive = document.getElementById(`tariffs-toggle-${lang}`).checked;
+            
+            UIElements.startScreen.classList.add('hidden');
+            createMainInterface();
+            bindGameEventListeners();
+            
+            document.getElementById(`player-name-display-${lang}`).textContent = playerName;
+            document.getElementById(`player-role-${lang}`).textContent = i18n['role'+playerRole];
+            UIElements.gameInterface.classList.remove('hidden');
+            
+            gameState.history = [];
+            roles.forEach(role => {
+                const delay = (role === 'Factory') ? 2 : (sanctionsActive ? 3 : 2);
+                gameState[role] = { inventory: 12, backlog: 0, incoming: Array(delay).fill(4), orders: [], cost: 0, totalCost: 0, outgoing: 0 };
+            });
+            gameState.customerDemandPattern = [4,4,4,4,8,8,8,8,4,4,4,4,4,4,4,4,8,8,8,8,4,4,4,4,4];
+            currentWeek = 0;
+            
+            ['', 'mobile-'].forEach(prefix => {
+                const connectorRoles = ['Factory', 'Distributor', 'Wholesaler'];
+                connectorRoles.forEach(roleName => {
+                    const connector = document.getElementById(`connector-${prefix}${lang}-${roleName}`);
+                    if (!connector) return;
+                    const downstreamRole = roles[roles.indexOf(roleName) + 1];
+                    if (downstreamRole === playerRole) {
+                        let trucksHTML = '';
+                        const delay = gameState[playerRole].incoming.length;
+                        for (let i = delay; i > 0; i--) {
+                            trucksHTML += `<div id="truck-icon-container-${prefix}${lang}-${playerRole}-${i}" class="truck-icon-container">${ICONS.Truck}<span id="truck-quantity-${prefix}${lang}-${playerRole}-${i}" class="truck-quantity">0</span></div>`;
+                        }
+                         if(prefix === 'mobile-') {
+                           connector.style.height = `${delay * 3.5}rem`; // Dynamic height for mobile connector
+                           connector.innerHTML = `<div class="absolute inset-0 flex flex-col items-center justify-evenly">${trucksHTML}</div>`;
+                        } else {
+                           connector.innerHTML = `<div class="absolute inset-0 flex items-center justify-evenly">${trucksHTML}</div>`;
+                        }
+                    }
+                });
+            });
+
+            UIElements.gameBoard = document.getElementById(`game-board-${lang}`);
+            createGameBoard(false);
+            createPerformanceChart();
+            updateUI(false);
+        }
+
+        // --- Core game logic ---
+        function advanceWeek() {
+            // Add a guard to prevent advancing past the final week.
+            if (currentWeek >= totalWeeks) return;
+
+            const playerOrderInput = document.getElementById(`${playerRole}-order-${lang}`);
+            if (!playerOrderInput) return;
+            const playerOrderValue = playerOrderInput.value;
+
+            const maxOrder = 999999;
+            if (playerOrderValue === '' || isNaN(playerOrderValue) || parseInt(playerOrderValue, 10) < 0 || parseInt(playerOrderValue, 10) > maxOrder) { showError("errorInvalidOrder"); return; }
+            const parsedOrder = parseInt(playerOrderValue, 10);
+            roles.forEach(role => { gameState[role].orders.push((role === playerRole) ? parsedOrder : getAIOrder(role)); });
+            roles.forEach(role => gameState[role].inventory += gameState[role].incoming.shift() || 0);
+            const shipmentsToSend = {};
+            for (let i = roles.length - 1; i >= 0; i--) {
+                const role = roles[i], state = gameState[role];
+                const demand = (role === 'Retailer') ? gameState.customerDemandPattern[currentWeek] : gameState[roles[i + 1]].orders[currentWeek];
+                const totalDemand = demand + state.backlog;
+                const shipped = Math.min(state.inventory, totalDemand);
+                state.inventory -= shipped; state.backlog = totalDemand - shipped; state.outgoing = shipped;
+                shipmentsToSend[role] = shipped;
+            }
+            roles.forEach(role => {
+                if (role === 'Factory') gameState[role].incoming.push(gameState[role].orders[currentWeek]);
+                else gameState[role].incoming.push(shipmentsToSend[roles[roles.indexOf(role) - 1]]);
+            });
+            const weekData = { week: currentWeek + 1, customerDemand: gameState.customerDemandPattern[currentWeek] };
+            roles.forEach(role => {
+                const state = gameState[role];
+                let weeklyCost = state.inventory * 0.5 + state.backlog * 1.0;
+                if ((tariffsActive || sanctionsActive) && role !== 'Factory') weeklyCost += state.orders[currentWeek] * UNIT_COST * TARIFF_RATE;
+                state.cost = weeklyCost; state.totalCost += weeklyCost;
+                weekData[role] = { ...state, incoming: [...state.incoming], order: state.orders[currentWeek], outgoing: state.outgoing };
+            });
+            gameState.history.push(weekData);
+            currentWeek++;
+            updateUI(false);
+            updatePerformanceChart();
+            if (currentWeek >= totalWeeks) {
+                document.getElementById(`next-week-btn-${lang}`).disabled = true;
+                showGameOver();
+            }
+        }
+
+        function getAIOrder(role) {
+            const state = gameState[role], downstream = roles[roles.indexOf(role) + 1];
+            const expectedDemand = (currentWeek > 0 && downstream) ? gameState[downstream].orders[currentWeek - 1] : 4;
+            const supplyLine = state.incoming.reduce((a, b) => a + b, 0);
+            const inventoryPosition = state.inventory + supplyLine - state.backlog;
+            const adjustment = AI_ADJUSTMENT_STRENGTH * (TARGET_INVENTORY - inventoryPosition);
+            return Math.round(Math.max(0, expectedDemand + adjustment));
+        }
+
+        // --- Chart Functions ---
+        function createPerformanceChart() {
+            const ctx = document.getElementById(`performance-chart-canvas-${lang}`);
+            if (!ctx) return;
+            
+            const legendLabelOptions = {
+                boxWidth: 12,
+                padding: 10,
+                font: {
+                    size: 10,
+                    family: lang === 'fa' ? 'Vazirmatn' : 'Manrope'
+                }
+            };
+
+            if (lang === 'fa') {
+                legendLabelOptions.font.size = 12; // Increase font size for Persian
+                legendLabelOptions.padding = 15;   // Add more space between items
+            }
+
+            const options = {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        ticks: { font: { family: lang === 'fa' ? 'Vazirmatn' : 'Manrope' } }
+                    },
+                    x: {
+                        ticks: { font: { family: lang === 'fa' ? 'Vazirmatn' : 'Manrope' } }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: legendLabelOptions
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index',
+                },
+            };
+            
+            performanceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        { label: i18n.chartInventory, data: [], borderColor: 'rgb(54, 162, 235)', backgroundColor: 'rgba(54, 162, 235, 0.5)', tension: 0.1 },
+                        { label: i18n.chartBacklog, data: [], borderColor: 'rgb(255, 99, 132)', backgroundColor: 'rgba(255, 99, 132, 0.5)', tension: 0.1 },
+                        { label: i18n.chartDemand, data: [], borderColor: 'rgb(150, 150, 150)', backgroundColor: 'rgba(150, 150, 150, 0.5)', borderDash: [5, 5], tension: 0.1 },
+                        { label: i18n.chartYourOrder, data: [], borderColor: 'rgb(75, 192, 192)', backgroundColor: 'rgba(75, 192, 192, 0.5)', borderDash: [2, 2], tension: 0.1 },
+                    ]
+                },
+                options: options
+            });
+        }
+
+        function updatePerformanceChart() {
+            if (!performanceChart) return;
+            const historySlice = gameState.history.slice(-10);
+            
+            performanceChart.data.labels = historySlice.map(h => `${i18n.week} ${h.week}`);
+            
+            performanceChart.data.datasets[0].data = historySlice.map(h => h[playerRole].inventory);
+            performanceChart.data.datasets[1].data = historySlice.map(h => h[playerRole].backlog);
+
+            const playerRoleIndex = roles.indexOf(playerRole);
+            const upstreamRole = roles[playerRoleIndex + 1];
+            if (playerRole === 'Retailer') {
+                performanceChart.data.datasets[2].data = historySlice.map(h => h.customerDemand);
+            } else {
+                 performanceChart.data.datasets[2].data = historySlice.map(h => h[upstreamRole].order);
+            }
+
+            performanceChart.data.datasets[3].data = historySlice.map(h => h[playerRole].order);
+
+            performanceChart.update();
+        }
+        
+        async function showGameOver() {
+            await saveGameReport();
+            const gameOverModal = createModal(
+                `game-over-modal-${lang}`,
+                i18n.simulationComplete,
+                `<p class="text-slate-600">${i18n.simulationCompleteDesc}</p>`,
+                `<button id="game-over-ok-btn-${lang}" class="material-button-filled">${i18n.ok}</button>`
+            );
+            gameOverModal.classList.remove('hidden');
+            document.getElementById(`game-over-ok-btn-${lang}`).addEventListener('click', () => {
+                gameOverModal.classList.add('hidden');
+                restartGame();
+            });
+        }
+
+        function restartGame() {
+            location.reload();
+        }
+
+        function bindStartEventListeners() {
+            UIElements.startScreen = document.getElementById(`start-screen-${lang}`);
+            UIElements.playerNameInput = document.getElementById(`player-name-input-${lang}`);
+            document.getElementById(`start-game-btn-${lang}`).addEventListener('click', startGame);
+            document.getElementById(`show-admin-panel-btn-${lang}`).addEventListener('click', showAdminLogin);
+            document.getElementById(`back-to-lang-${lang}`).addEventListener('click', () => window.location.reload());
+        }
+
+        function bindGameEventListeners() {
+            UIElements.gameInterface = document.getElementById(`game-interface-${lang}`);
+            document.getElementById(`next-week-btn-${lang}`).addEventListener('click', advanceWeek);
+            document.getElementById(`end-game-btn-${lang}`).addEventListener('click', showGameOver);
+        }
+        
+        function showError(messageKey) { UIElements.errorMessageText.textContent = i18n[messageKey]; UIElements.errorModal.classList.remove('hidden'); }
+        function hideError() { UIElements.errorModal.classList.add('hidden'); }
+        function showAdminLogin() { 
+            const adminPasswordModal = createModal(`admin-password-modal-${lang}`, i18n.adminAccess, `
+                <p class="text-slate-600">${i18n.adminPasswordPrompt}</p>
+                <div class="material-input-container mt-4">
+                    <input type="password" id="admin-password-input-${lang}" class="material-input peer" placeholder=" ">
+                    <label for="admin-password-input-${lang}" class="material-input-label">${i18n.password}</label>
+                </div>
+                <p id="admin-password-error-${lang}" class="text-red-500 text-sm hidden">${i18n.incorrectPassword}</p>
+            `, `<button id="cancel-admin-login-btn-${lang}" class="material-button-text">${i18n.cancel}</button><button id="submit-admin-login-btn-${lang}" class="material-button-filled">${i18n.submit}</button>`);
+            
+            adminPasswordModal.classList.remove('hidden');
+
+            document.getElementById(`cancel-admin-login-btn-${lang}`).addEventListener('click', () => adminPasswordModal.classList.add('hidden'));
+            document.getElementById(`submit-admin-login-btn-${lang}`).addEventListener('click', submitAdminLogin);
+             document.getElementById(`admin-password-input-${lang}`).addEventListener('keyup', (e) => { if (e.key === 'Enter') submitAdminLogin(); });
+        }
+        
+        async function submitAdminLogin() {
+            const passInput = document.getElementById(`admin-password-input-${lang}`);
+            const password = passInput.value;
+            const errorEl = document.getElementById(`admin-password-error-${lang}`);
+            errorEl.classList.add('hidden');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}?action=login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+
+                if (response.ok) {
+                    adminPassword = password; // Store password for this session
+                    document.getElementById(`admin-password-modal-${lang}`).classList.add('hidden');
+                    showAdminPanel();
+                } else {
+                    errorEl.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error("Login failed:", error);
+                errorEl.textContent = i18n.errorServer;
+                errorEl.classList.remove('hidden');
+            }
+        }
+        
+        async function saveGameReport() {
+            const report = { playerName, role: playerRole, sanctions: sanctionsActive, tariffs: tariffsActive, history: gameState.history };
+            const csvContent = generateCSVContent(report);
+            const reportName = `beer_game_${playerName.replace(/\s+/g, '_') || 'anon'}_${Date.now()}.csv`;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}?action=save`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reportName, reportData: csvContent })
+                });
+
+                if (!response.ok) throw new Error('Server responded with an error.');
+                
+                showToast(i18n.reportSavedOnline, true);
+            } catch (error) {
+                console.error('Could not save report to server:', error);
+                showToast(i18n.reportSavedLocally, false);
+            }
+        }
+
+        function showToast(message, isSuccess = true) {
+            const toast = document.getElementById(`toast-notification-${lang}`);
+            if(!toast) return;
+            toast.textContent = message;
+            toast.style.backgroundColor = isSuccess ? '#22c55e' : '#ef4444';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // --- Admin Panel ---
+        function showAdminPanel() {
+            UIElements.startScreen.classList.add('hidden');
+            const adminHTML = `
+            <div id="admin-panel-${lang}" class="max-w-4xl mx-auto space-y-4 p-2 sm:p-4 w-full">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-3xl sm:text-4xl font-bold text-slate-900">${i18n.adminPanelTitle}</h1>
+                    <button id="back-to-start-btn-${lang}" class="material-button-text">${i18n.back}</button>
+                </div>
+                <div id="admin-controls-${lang}" class="hidden material-card p-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="select-all-reports-${lang}" class="h-5 w-5 rounded border-gray-300 text-cyan-600 focus:ring-cyan-500">
+                        <label for="select-all-reports-${lang}" class="ml-2 font-semibold cursor-pointer">${i18n.selectAll}</label>
+                    </div>
+                    <div class="flex gap-2 flex-wrap justify-center">
+                        <button id="download-selected-zip-btn-${lang}" class="material-button-outlined">${i18n.downloadSelectedZip}</button>
+                        <button id="delete-selected-reports-btn-${lang}" class="material-button-outlined border-red-500 text-red-600 hover:bg-red-50">${i18n.deleteSelected}</button>
+                    </div>
+                </div>
+                <div class="material-card p-4">
+                     <p id="loading-reports-${lang}" class="text-slate-500">${i18n.loadingReports}</p>
+                     <div id="reports-list-${lang}" class="space-y-3"></div>
+                </div>
+            </div>`;
+            UIElements.container.innerHTML = adminHTML;
+            document.getElementById(`back-to-start-btn-${lang}`).addEventListener('click', hideAdminPanel);
+            loadAndDisplayReports();
+        }
+
+        function hideAdminPanel() {
+             adminPassword = null; // Clear password on exit
+             UIElements.container.innerHTML = '';
+             createStartScreen();
+             bindStartEventListeners();
+        }
+        
+        async function loadAndDisplayReports() {
+             const reportsListEl = document.getElementById(`reports-list-${lang}`);
+             const loadingEl = document.getElementById(`loading-reports-${lang}`);
+             const adminControls = document.getElementById(`admin-controls-${lang}`);
+             
+             try {
+                const response = await fetch(`${API_BASE_URL}?action=list&password=${encodeURIComponent(adminPassword)}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch reports. Check password or server script.');
+                }
+                allFetchedReports = await response.json();
+             } catch(error) {
+                console.error(error);
+                loadingEl.textContent = i18n.errorServer;
+                adminControls.classList.add('hidden');
+                return;
+             }
+
+             if (allFetchedReports.length === 0) {
+                 loadingEl.textContent = i18n.noReports;
+                 adminControls.classList.add('hidden');
+                 return;
+             }
+             
+             loadingEl.classList.add('hidden');
+             adminControls.classList.remove('hidden');
+             reportsListEl.innerHTML = '';
+
+             allFetchedReports.forEach(report => {
+                 const gregorianDate = new Date(report.modified).toLocaleString();
+                 const shamsiDate = new Date(report.modified).toLocaleDateString('fa-IR');
+                 // Extract info from filename: beer_game_Player_Name_timestamp.csv
+                 const parts = report.filename.replace('.csv', '').split('_');
+                 const rPlayerName = parts.slice(2, -1).join(' ') || 'Anonymous';
+                 
+                 const reportEl = document.createElement('div');
+                 reportEl.className = 'report-item flex flex-col md:flex-row justify-between items-start md:items-center p-4 border-b last:border-b-0';
+                 reportEl.innerHTML = `
+                     <div class="flex items-center flex-grow w-full md:w-auto mb-3 md:mb-0">
+                         <input type="checkbox" value="${report.filename}" class="report-checkbox-${lang} h-5 w-5 rounded border-gray-300 text-cyan-600 focus:ring-cyan-500 self-center">
+                         <div class="flex-grow ${lang === 'fa' ? 'mr-4' : 'ml-4'}">
+                             <p class="font-semibold">${i18n.playerName}: <span class="font-normal">${rPlayerName}</span></p>
+                             <p class="text-sm text-slate-600">${i18n.date}: ${gregorianDate} ${lang === 'fa' ? `(${shamsiDate})` : ''}</p>
+                         </div>
+                     </div>
+                     <button class="download-btn material-button-text w-full md:w-auto">${i18n.downloadCSV}</button>`;
+                 reportEl.querySelector('.download-btn').addEventListener('click', () => downloadSingleReport(report.filename));
+                 reportsListEl.appendChild(reportEl);
+             });
+             
+             document.getElementById(`select-all-reports-${lang}`).addEventListener('click', (e) => {
+                 document.querySelectorAll(`.report-checkbox-${lang}`).forEach(c => c.checked = e.target.checked);
+             });
+             document.getElementById(`delete-selected-reports-btn-${lang}`).addEventListener('click', () => {
+                const confirmModal = createModal(`confirm-modal-${lang}`, i18n.confirmDelete, `<p class="text-slate-600">${i18n.confirmDelete}</p>`, `<button id="cancel-confirm-btn-${lang}" class="material-button-text">${i18n.cancel}</button><button id="confirm-delete-btn-${lang}" class="material-button-filled bg-red-600 hover:bg-red-700">${i18n.delete}</button>`);
+                
+                 if (document.querySelectorAll(`.report-checkbox-${lang}:checked`).length > 0) {
+                     confirmModal.classList.remove('hidden');
+                     document.getElementById(`cancel-confirm-btn-${lang}`).onclick = () => confirmModal.classList.add('hidden');
+                     document.getElementById(`confirm-delete-btn-${lang}`).onclick = () => {
+                         handleDeleteSelectedReports();
+                         confirmModal.classList.add('hidden');
+                     };
+                 } else {
+                     showError('noReportsSelected');
+                 }
+             });
+             document.getElementById(`download-selected-zip-btn-${lang}`).addEventListener('click', downloadSelectedReportsAsZip);
+        }
+
+        async function handleDeleteSelectedReports() {
+            const selectedFilenames = Array.from(document.querySelectorAll(`.report-checkbox-${lang}:checked`)).map(cb => cb.value);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}?action=delete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: adminPassword, filenames: selectedFilenames })
+                });
+                if (!response.ok) throw new Error('Failed to delete files.');
+                await response.json(); // Wait for the body to be read
+            } catch (error) {
+                console.error(error);
+                showError('errorServer');
+            }
+            loadAndDisplayReports(); // Refresh the list
+        }
+
+        function generateCSVContent(report) {
+            const langDict = langData.en; 
+            let csvContent = '\uFEFF'; 
+            csvContent += `${langDict.gameSettings}\r\n`;
+            csvContent += `${langDict.playerName}:,"${report.playerName || 'Anonymous'}"\r\n`;
+            csvContent += `${langDict.role}:,"${langDict['role' + (report.role)] || report.role}"\r\n`;
+            csvContent += `${langDict.sanctionsEnabled}:,${report.sanctions ? langDict.yes : langDict.no}\r\n`;
+            csvContent += `${langDict.tariffsEnabled}:,${report.tariffs ? langDict.yes : langDict.no}\r\n\r\n`;
+            const headers = [langDict.week, langDict.customerDemand, ...roles.flatMap(r => [`${langDict['role' + r]}_${langDict.inventory}`, `${langDict['role' + r]}_${langDict.backlog}`, `${langDict['role' + r]}_${langDict.incoming}`, `${langDict['role' + r]}_${langDict.order}`, `${langDict['role' + r]}_${langDict.weeklyCost}`, `${langDict['role' + r]}_${langDict.totalCostHeader}`])];
+            csvContent += headers.join(",") + "\r\n";
+            report.history.forEach(row => {
+                let rowArray = [row.week, row.customerDemand];
+                roles.forEach(r => {
+                    const d = row[r] || {};
+                    rowArray.push(d.inventory, d.backlog, `"${(d.incoming || []).join(';')}"`, d.order, (d.weeklyCost || d.cost || 0).toFixed(2), (d.totalCost || 0).toFixed(2));
+                });
+                csvContent += rowArray.join(",") + "\r\n";
+            });
+            return csvContent;
+        }
+
+        function downloadSingleReport(filename) {
+            window.location.href = `${API_BASE_URL}?action=download&file=${encodeURIComponent(filename)}&password=${encodeURIComponent(adminPassword)}`;
+        }
+
+        async function downloadSelectedReportsAsZip() {
+            const selectedFilenames = Array.from(document.querySelectorAll(`.report-checkbox-${lang}:checked`)).map(cb => cb.value);
+            if (selectedFilenames.length === 0) { showError('noReportsSelectedZip'); return; }
+
+            const zip = new JSZip();
+            
+            // Show a loading indicator if you have one
+            try {
+                for (const filename of selectedFilenames) {
+                    const response = await fetch(`${API_BASE_URL}?action=download&file=${encodeURIComponent(filename)}&password=${encodeURIComponent(adminPassword)}`);
+                    if (!response.ok) {
+                        console.error(`Failed to fetch ${filename} for zipping.`);
+                        continue; // Skip this file
+                    }
+                    const fileContent = await response.text();
+                    zip.file(filename, fileContent);
+                }
+
+                const content = await zip.generateAsync({ type: "blob" });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(content);
+                link.download = "beer_game_reports.zip";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } catch (error) {
+                 console.error("Zipping failed:", error);
+                 showError('errorServer');
+            }
+            // Hide loading indicator
+        }
+
+
+        // --- Initial Setup ---
+        createStartScreen();
+        setupModals();
+        bindStartEventListeners();
+
+    } // End of initializeGame function
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const langSelectionScreen = document.getElementById('language-selection-screen');
+        const gameContainerEn = document.getElementById('game-container-en');
+        const gameContainerFa = document.getElementById('game-container-fa');
+
+        document.getElementById('select-lang-en').addEventListener('click', () => {
+            langSelectionScreen.classList.add('hidden');
+            gameContainerEn.classList.remove('hidden');
+            if (!gameContainerEn.dataset.initialized) {
+                initializeGame('en');
+                gameContainerEn.dataset.initialized = 'true';
+            }
+        });
+
+        document.getElementById('select-lang-fa').addEventListener('click', () => {
+            langSelectionScreen.classList.add('hidden');
+            gameContainerFa.classList.remove('hidden');
+            if (!gameContainerFa.dataset.initialized) {
+                initializeGame('fa');
+                gameContainerFa.dataset.initialized = 'true';
+            }
+        });
+
+        function injectSharedSvgDefs() {
+            if (document.getElementById('svg-defs')) return;
+            const defs = `
+                <svg id="svg-defs" width="0" height="0" style="position:absolute">
+                    <defs>
+                        <linearGradient id="metal-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#E0E0E0"/><stop offset="50%" stop-color="#FFFFFF"/><stop offset="100%" stop-color="#D6D6D6"/></linearGradient>
+                        <linearGradient id="truck-body-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#42A5F5"/><stop offset="100%" stop-color="#1976D2"/></linearGradient>
+                        <linearGradient id="window-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#E3F2FD"/><stop offset="100%" stop-color="#BBDEFB"/></linearGradient>
+                        <linearGradient id="box-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#D2B48C"/><stop offset="100%" stop-color="#A0522D"/></linearGradient>
+                        <linearGradient id="awning-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#81C784"/><stop offset="100%" stop-color="#388E3C"/></linearGradient>
+                        <linearGradient id="can-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFF"/><stop offset="100%" stop-color="#BDBDBD"/></linearGradient>
+                        <linearGradient id="can-label" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#EF5350"/><stop offset="100%" stop-color="#D32F2F"/></linearGradient>
+                        <linearGradient id="backlog-grad" x1="0.5" y1="0" x2="0.5" y2="1"><stop offset="0%" stop-color="#FFCA28"/><stop offset="100%" stop-color="#F57F17"/></linearGradient>
+                        <linearGradient id="outgoing-arrow-grad" x1="0.5" y1="0" x2="0.5" y2="1"><stop offset="0%" stop-color="#AED581"/><stop offset="100%" stop-color="#689F38"/></linearGradient>
+                        <linearGradient id="bag-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#A1887F"/><stop offset="100%" stop-color="#6D4C41"/></linearGradient>
+                        <radialGradient id="coin-grad" cx="0.5" cy="0.5" r="0.5"><stop offset="0%" stop-color="#FFECB3"/><stop offset="100%" stop-color="#FFB300"/></radialGradient>
+                        <radialGradient id="globe-grad" cx="0.4" cy="0.4" r="0.6"><stop offset="0%" stop-color="#64B5F6"/><stop offset="100%" stop-color="#1565C0"/></radialGradient>
+                        <filter id="realistic-shadow"><feDropShadow dx="2" dy="4" stdDeviation="3" flood-color="#000" flood-opacity="0.25"/></filter>
+                    </defs>
+                </svg>
+            `;
+            document.body.insertAdjacentHTML('afterbegin', defs);
+        }
+        injectSharedSvgDefs();
+    });
+    </script>
+
+</body>
+</html>
+
+
