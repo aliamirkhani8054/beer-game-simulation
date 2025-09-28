@@ -6,6 +6,9 @@ You can play the latest version of the game directly in your browser at:
 
 https://scmgames.com
 
+https://github.com/aliamirkhani8054/beer-game-simulation/blob/main/Screenshot%202025-09-28%20141843.png
+https://github.com/aliamirkhani8054/beer-game-simulation/blob/main/Screenshot%202025-09-28%20141925.png
+
 About the Game
 This interactive game highlights the "bullwhip effect" and shows how small fluctuations in demand at the retail level can cause progressively larger fluctuations at the wholesale, distribution, and factory levels.
 
