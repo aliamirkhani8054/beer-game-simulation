@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beer Game Supply chain simulation</title>
+    <title>Beer Game Supply chain simulation (Offline Version)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <!-- ADDED: Chart.js library for performance chart -->
@@ -284,7 +283,8 @@
     
     <script>
     function initializeGame(lang) {
-        const API_BASE_URL = './admin.php';
+        // NOTE: API_BASE_URL is not used in this offline version, but kept for structure.
+        const API_BASE_URL = '';
 
         const UIElements = {
             container: document.getElementById(`game-container-${lang}`),
@@ -336,16 +336,16 @@
                 gameTitle: "Beer Game Supply chain simulation", player: "Player", role: "Role", endGame: "End Game", week: "Week", 
                 nextWeek: "Next Week", customerDemand: "Customer Demand",
                 simulationComplete: "Simulation Complete",
-                simulationCompleteDesc: "You have successfully completed the 25-week simulation. Your report has been saved to the server.",
+                simulationCompleteDesc: "You have successfully completed the 25-week simulation. Your report has been saved to your computer.",
                 ok: "OK",
                 yourRole: "Your Role", totalCost: "Total Supply Chain Cost", playAgain: "Play Again", 
-                adminAccess: "Admin Access", adminPasswordPrompt: "Please enter the admin password to view reports.", 
+                adminAccess: "Admin Access", adminPasswordPrompt: "Please enter the admin password.", 
                 password: "Password", incorrectPassword: "Incorrect password. Please try again.", cancel: "Cancel", 
                 submit: "Submit", invalidAction: "Invalid Action", inventory: "Inventory", backlog: "Backlog", 
                 shippingPipeline: "Shipping Pipeline", arrivingNextWeek: "Arriving Next Week", weeklyCost: "Weekly Cost", 
                 totalCostHeader: "Total Cost", productionOrder: "Start Production", placeOrder: "Place Your Order", 
-                orderPlaceholder: "e.g., 8", adminPanelTitle: "Admin Panel: Game Reports", back: "Back", 
-                loadingReports: "Loading reports from server...", noReports: "No game reports found on the server.", date: "Date", 
+                orderPlaceholder: "e.g., 8", adminPanelTitle: "Admin Panel", back: "Back", 
+                loadingReports: "Loading reports...", noReports: "No reports found.", date: "Date", 
                 downloadCSV: "Download CSV", gameSettings: "Game Settings", playerName: "Player Name", 
                 sanctionsEnabled: "Sanctions Enabled", tariffsEnabled: "Tariffs Enabled", yes: "Yes", no: "No", 
                 order: "Order", incoming: "Incoming", errorEnterName: "Please enter a name to start the game.", 
@@ -353,13 +353,13 @@
                 errorInvalidName: "Please use only letters and spaces in your name.",
                 roleFactory: "Factory", roleDistributor: "Distributor", roleWholesaler: "Wholesaler", roleRetailer: "Retailer",
                 selectAll: "Select All", deleteSelected: "Delete Selected",
-                confirmDelete: "Are you sure you want to delete the selected reports from the server?",
+                confirmDelete: "Are you sure you want to delete the selected reports?",
                 noReportsSelected: "No reports selected for deletion.", delete: "Delete",
                 errorServer: "Could not connect to the server. Please check your internet connection and the server script.",
                 downloadSelectedZip: "Download Selected as ZIP",
                 noReportsSelectedZip: "No reports selected for download.",
-                reportSavedOnline: "Your game data has been saved to the server.",
-                reportSavedLocally: "Game report could not be saved to server. Check connection.",
+                reportSavedOnline: "Report successfully downloaded to your computer.",
+                reportSavedLocally: "Could not download report. An error occurred.",
                 outgoing: "Outgoing",
                 howToPlay: "How to Play",
                 howToPlayDesc: "Welcome to the supply chain! Your goal is to keep costs low. Each week, you'll ship goods and order more to restock. Inventory costs $0.50 per unit, while backlogs (unfulfilled orders) cost $1.00. Smart ordering is key to winning!",
@@ -385,16 +385,16 @@
                 gameTitle: "شبیه ساز زنجیره تامین", player: "بازیکن", role: "نقش", endGame: "پایان بازی", week: "هفته", 
                 nextWeek: "هفته بعد", customerDemand: "تقاضای مشتری",
                 simulationComplete: "شبیه‌سازی کامل شد",
-                simulationCompleteDesc: "شما شبیه‌سازی ۲۵ هفته‌ای را با موفقیت به پایان رساندید. گزارش شما در سرور ذخیره شد.",
+                simulationCompleteDesc: "شما شبیه‌سازی ۲۵ هفته‌ای را با موفقیت به پایان رساندید. گزارش شما در کامپیوترتان ذخیره شد.",
                 ok: "باشه",
                 yourRole: "نقش شما", totalCost: "هزیه کل زنجیره تأمین", playAgain: "بازی دوباره", 
-                adminAccess: "دسترسی ادمین", adminPasswordPrompt: "لطفاً برای مشاهده گزارش‌ها رمز عبور ادمین را وارد کنید.", 
+                adminAccess: "دسترسی ادمین", adminPasswordPrompt: "لطفاً رمز عبور ادمین را وارد کنید.", 
                 password: "رمز عبور", incorrectPassword: "رمز عبور اشتباه است. لطفاً دوباره تلاش کنید.", cancel: "لغو", 
                 submit: "تأیید", invalidAction: "عملیات نامعتبر", inventory: "موجودی", backlog: "کسری", 
                 shippingPipeline: "محموله‌های در راه", arrivingNextWeek: "ورودی هفته آینده", weeklyCost: "هزینه هفتگی", 
                 totalCostHeader: "هزینه کل", productionOrder: "شروع تولید", placeOrder: "ثبت سفارش", 
-                orderPlaceholder: "مثال: ۸", adminPanelTitle: "پنل ادمین: گزارش‌های بازی", back: "بازگشت", 
-                loadingReports: "در حال بارگذاری گزارش‌ها از سرور...", noReports: "هیچ گزارشی در سرور یافت نشد.", date: "تاریخ", 
+                orderPlaceholder: "مثال: ۸", adminPanelTitle: "پنل ادمین", back: "بازگشت", 
+                loadingReports: "در حال بارگذاری گزارش‌ها...", noReports: "هیچ گزارشی یافت نشد.", date: "تاریخ", 
                 downloadCSV: "دانلود CSV", gameSettings: "تنظیمات بازی", playerName: "نام بازیکن", 
                 sanctionsEnabled: "تحریم‌ها فعال", tariffsEnabled: "تعرفه‌ها فعال", yes: "بله", no: "خیر", 
                 order: "سفارش", incoming: "ورودی", errorEnterName: "لطفا برای شروع بازی یک نام وارد کنید.", 
@@ -402,13 +402,13 @@
                 errorInvalidName: "لطفا در نام خود فقط از حروف و فاصله استفاده کنید.",
                 roleFactory: "کارخانه", roleDistributor: "توزیع‌کننده", roleWholesaler: "عمده‌فروش", roleRetailer: "خرده‌فروش",
                 selectAll: "انتخاب همه", deleteSelected: "حذف موارد انتخابی",
-                confirmDelete: "آیا از حذف گزارش‌های انتخاب شده از سرور مطمئن هستید؟",
+                confirmDelete: "آیا از حذف گزارش‌های انتخاب شده مطمئن هستید؟",
                 noReportsSelected: "هیچ گزارشی برای حذف انتخاب نشده است.", delete: "حذف",
                 errorServer: "امکان اتصال به سرور وجود ندارد. لطفا اتصال اینترنت و اسکریپت سرور را بررسی کنید.",
                 downloadSelectedZip: "دانلود منتخب به صورت ZIP",
                 noReportsSelectedZip: "هیچ گزارشی برای دانلود انتخاب نشده است.",
-                reportSavedOnline: "اطلاعات بازی شما در سرور ذخیره شد.",
-                reportSavedLocally: "امکان ذخیره گزارش در سرور وجود نداشت. اتصال را بررسی کنید.",
+                reportSavedOnline: "گزارش با موفقیت در کامپیوتر شما دانلود شد.",
+                reportSavedLocally: "امکان دانلود گزارش وجود نداشت. خطایی رخ داد.",
                 outgoing: "ارسالی",
                 howToPlay: "راهنمای بازی",
                 howToPlayDesc: "به زنجیره تامین خوش آمدید! هدف شما پایین نگه داشتن هزینه‌هاست. هر هفته، کالا ارسال می‌کنید و برای پر کردن انبار سفارش جدید می‌دهید. هزینه موجودی ۵۰۰ تومان و هزینه کسری ۱۰۰۰ تومان است. سفارش هوشمندانه کلید پیروزی است!",
@@ -1019,24 +1019,13 @@
             const password = passInput.value;
             const errorEl = document.getElementById(`admin-password-error-${lang}`);
             errorEl.classList.add('hidden');
-
-            try {
-                const response = await fetch(`${API_BASE_URL}?action=login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password })
-                });
-
-                if (response.ok) {
-                    adminPassword = password; // Store password for this session
-                    document.getElementById(`admin-password-modal-${lang}`).classList.add('hidden');
-                    showAdminPanel();
-                } else {
-                    errorEl.classList.remove('hidden');
-                }
-            } catch (error) {
-                console.error("Login failed:", error);
-                errorEl.textContent = i18n.errorServer;
+            
+            // OFFLINE CHANGE: Check password directly without server
+            if (password === 'admin123') {
+                adminPassword = password; // Store password for this session
+                document.getElementById(`admin-password-modal-${lang}`).classList.add('hidden');
+                showAdminPanel();
+            } else {
                 errorEl.classList.remove('hidden');
             }
         }
@@ -1046,15 +1035,19 @@
             const csvContent = generateCSVContent(report);
             const reportName = `beer_game_${playerName.replace(/\s+/g, '_') || 'anon'}_${Date.now()}.csv`;
 
+            // OFFLINE CHANGE: Trigger a local download instead of sending to server
             try {
-                const response = await fetch(`${API_BASE_URL}?action=save`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ reportName, reportData: csvContent })
-                });
-
-                if (!response.ok) throw new Error('Server responded with an error.');
-                
+                const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a");
+                if (link.download !== undefined) {
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute("href", url);
+                    link.setAttribute("download", reportName);
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
                 showToast(i18n.reportSavedOnline, true);
             } catch (error) {
                 console.error('Could not save report to server:', error);
@@ -1080,18 +1073,7 @@
                     <h1 class="text-3xl sm:text-4xl font-bold text-slate-900">${i18n.adminPanelTitle}</h1>
                     <button id="back-to-start-btn-${lang}" class="material-button-text">${i18n.back}</button>
                 </div>
-                <div id="admin-controls-${lang}" class="hidden material-card p-4 flex flex-col sm:flex-row justify-between items-center gap-2">
-                    <div class="flex items-center">
-                        <input type="checkbox" id="select-all-reports-${lang}" class="h-5 w-5 rounded border-gray-300 text-cyan-600 focus:ring-cyan-500">
-                        <label for="select-all-reports-${lang}" class="ml-2 font-semibold cursor-pointer">${i18n.selectAll}</label>
-                    </div>
-                    <div class="flex gap-2 flex-wrap justify-center">
-                        <button id="download-selected-zip-btn-${lang}" class="material-button-outlined">${i18n.downloadSelectedZip}</button>
-                        <button id="delete-selected-reports-btn-${lang}" class="material-button-outlined border-red-500 text-red-600 hover:bg-red-50">${i18n.deleteSelected}</button>
-                    </div>
-                </div>
                 <div class="material-card p-4">
-                     <p id="loading-reports-${lang}" class="text-slate-500">${i18n.loadingReports}</p>
                      <div id="reports-list-${lang}" class="space-y-3"></div>
                 </div>
             </div>`;
@@ -1108,91 +1090,11 @@
         }
         
         async function loadAndDisplayReports() {
+             // OFFLINE CHANGE: Display a message instead of fetching reports.
              const reportsListEl = document.getElementById(`reports-list-${lang}`);
-             const loadingEl = document.getElementById(`loading-reports-${lang}`);
-             const adminControls = document.getElementById(`admin-controls-${lang}`);
-             
-             try {
-                const response = await fetch(`${API_BASE_URL}?action=list&password=${encodeURIComponent(adminPassword)}`);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch reports. Check password or server script.');
-                }
-                allFetchedReports = await response.json();
-             } catch(error) {
-                console.error(error);
-                loadingEl.textContent = i18n.errorServer;
-                adminControls.classList.add('hidden');
-                return;
-             }
-
-             if (allFetchedReports.length === 0) {
-                 loadingEl.textContent = i18n.noReports;
-                 adminControls.classList.add('hidden');
-                 return;
-             }
-             
-             loadingEl.classList.add('hidden');
-             adminControls.classList.remove('hidden');
-             reportsListEl.innerHTML = '';
-
-             allFetchedReports.forEach(report => {
-                 const gregorianDate = new Date(report.modified).toLocaleString();
-                 const shamsiDate = new Date(report.modified).toLocaleDateString('fa-IR');
-                 // Extract info from filename: beer_game_Player_Name_timestamp.csv
-                 const parts = report.filename.replace('.csv', '').split('_');
-                 const rPlayerName = parts.slice(2, -1).join(' ') || 'Anonymous';
-                 
-                 const reportEl = document.createElement('div');
-                 reportEl.className = 'report-item flex flex-col md:flex-row justify-between items-start md:items-center p-4 border-b last:border-b-0';
-                 reportEl.innerHTML = `
-                     <div class="flex items-center flex-grow w-full md:w-auto mb-3 md:mb-0">
-                         <input type="checkbox" value="${report.filename}" class="report-checkbox-${lang} h-5 w-5 rounded border-gray-300 text-cyan-600 focus:ring-cyan-500 self-center">
-                         <div class="flex-grow ${lang === 'fa' ? 'mr-4' : 'ml-4'}">
-                             <p class="font-semibold">${i18n.playerName}: <span class="font-normal">${rPlayerName}</span></p>
-                             <p class="text-sm text-slate-600">${i18n.date}: ${gregorianDate} ${lang === 'fa' ? `(${shamsiDate})` : ''}</p>
-                         </div>
-                     </div>
-                     <button class="download-btn material-button-text w-full md:w-auto">${i18n.downloadCSV}</button>`;
-                 reportEl.querySelector('.download-btn').addEventListener('click', () => downloadSingleReport(report.filename));
-                 reportsListEl.appendChild(reportEl);
-             });
-             
-             document.getElementById(`select-all-reports-${lang}`).addEventListener('click', (e) => {
-                 document.querySelectorAll(`.report-checkbox-${lang}`).forEach(c => c.checked = e.target.checked);
-             });
-             document.getElementById(`delete-selected-reports-btn-${lang}`).addEventListener('click', () => {
-                const confirmModal = createModal(`confirm-modal-${lang}`, i18n.confirmDelete, `<p class="text-slate-600">${i18n.confirmDelete}</p>`, `<button id="cancel-confirm-btn-${lang}" class="material-button-text">${i18n.cancel}</button><button id="confirm-delete-btn-${lang}" class="material-button-filled bg-red-600 hover:bg-red-700">${i18n.delete}</button>`);
-                
-                 if (document.querySelectorAll(`.report-checkbox-${lang}:checked`).length > 0) {
-                     confirmModal.classList.remove('hidden');
-                     document.getElementById(`cancel-confirm-btn-${lang}`).onclick = () => confirmModal.classList.add('hidden');
-                     document.getElementById(`confirm-delete-btn-${lang}`).onclick = () => {
-                         handleDeleteSelectedReports();
-                         confirmModal.classList.add('hidden');
-                     };
-                 } else {
-                     showError('noReportsSelected');
-                 }
-             });
-             document.getElementById(`download-selected-zip-btn-${lang}`).addEventListener('click', downloadSelectedReportsAsZip);
-        }
-
-        async function handleDeleteSelectedReports() {
-            const selectedFilenames = Array.from(document.querySelectorAll(`.report-checkbox-${lang}:checked`)).map(cb => cb.value);
-            
-            try {
-                const response = await fetch(`${API_BASE_URL}?action=delete`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password: adminPassword, filenames: selectedFilenames })
-                });
-                if (!response.ok) throw new Error('Failed to delete files.');
-                await response.json(); // Wait for the body to be read
-            } catch (error) {
-                console.error(error);
-                showError('errorServer');
-            }
-            loadAndDisplayReports(); // Refresh the list
+             const offlineMessageEn = `This is an offline version of the game. Game reports are downloaded directly to your computer at the end of each simulation. There are no server reports to display here.`;
+             const offlineMessageFa = `این یک نسخه آفلاین از بازی است. گزارش‌های بازی در پایان هر شبیه‌سازی مستقیماً در رایانه شما دانلود می‌شوند. گزارشی برای نمایش در اینجا وجود ندارد.`;
+             reportsListEl.innerHTML = `<p class="p-4 text-slate-600">${lang === 'fa' ? offlineMessageFa : offlineMessageEn}</p>`;
         }
 
         function generateCSVContent(report) {
@@ -1202,7 +1104,7 @@
             csvContent += `${langDict.playerName}:,"${report.playerName || 'Anonymous'}"\r\n`;
             csvContent += `${langDict.role}:,"${langDict['role' + (report.role)] || report.role}"\r\n`;
             csvContent += `${langDict.sanctionsEnabled}:,${report.sanctions ? langDict.yes : langDict.no}\r\n`;
-            csvContent += `${langDict.tariffsEnabled}:,${report.tariffs ? langDict.yes : langDict.no}\r\n\r\n`;
+            csvContent += `${langDict.tariffsEnabled}:,${report.tariffs ? langDict.yes : langDict.no}\r-n\r\n`;
             const headers = [langDict.week, langDict.customerDemand, ...roles.flatMap(r => [`${langDict['role' + r]}_${langDict.inventory}`, `${langDict['role' + r]}_${langDict.backlog}`, `${langDict['role' + r]}_${langDict.incoming}`, `${langDict['role' + r]}_${langDict.order}`, `${langDict['role' + r]}_${langDict.weeklyCost}`, `${langDict['role' + r]}_${langDict.totalCostHeader}`])];
             csvContent += headers.join(",") + "\r\n";
             report.history.forEach(row => {
@@ -1215,44 +1117,7 @@
             });
             return csvContent;
         }
-
-        function downloadSingleReport(filename) {
-            window.location.href = `${API_BASE_URL}?action=download&file=${encodeURIComponent(filename)}&password=${encodeURIComponent(adminPassword)}`;
-        }
-
-        async function downloadSelectedReportsAsZip() {
-            const selectedFilenames = Array.from(document.querySelectorAll(`.report-checkbox-${lang}:checked`)).map(cb => cb.value);
-            if (selectedFilenames.length === 0) { showError('noReportsSelectedZip'); return; }
-
-            const zip = new JSZip();
-            
-            // Show a loading indicator if you have one
-            try {
-                for (const filename of selectedFilenames) {
-                    const response = await fetch(`${API_BASE_URL}?action=download&file=${encodeURIComponent(filename)}&password=${encodeURIComponent(adminPassword)}`);
-                    if (!response.ok) {
-                        console.error(`Failed to fetch ${filename} for zipping.`);
-                        continue; // Skip this file
-                    }
-                    const fileContent = await response.text();
-                    zip.file(filename, fileContent);
-                }
-
-                const content = await zip.generateAsync({ type: "blob" });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(content);
-                link.download = "beer_game_reports.zip";
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            } catch (error) {
-                 console.error("Zipping failed:", error);
-                 showError('errorServer');
-            }
-            // Hide loading indicator
-        }
-
-
+        
         // --- Initial Setup ---
         createStartScreen();
         setupModals();
@@ -1312,5 +1177,3 @@
 
 </body>
 </html>
-
-
