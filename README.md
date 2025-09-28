@@ -12,6 +12,8 @@ https://github.com/aliamirkhani8054/beer-game-simulation/blob/main/Screenshot%20
 About the Game
 This interactive game highlights the "bullwhip effect" and shows how small fluctuations in demand at the retail level can cause progressively larger fluctuations at the wholesale, distribution, and factory levels.
 
+admin Password: admin123
+
 Features
 Interactive Gameplay: Play as the Retailer, Wholesaler, Distributor, or Factory.
 
