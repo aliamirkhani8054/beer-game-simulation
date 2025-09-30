@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beer Game Supply chain simulation (Offline Version)</title>
+    <title>Beer Game Supply chain simulation</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <!-- ADDED: Chart.js library for performance chart -->
@@ -37,6 +37,21 @@
         .lang-en-container { font-family: 'Manrope', sans-serif; }
         .lang-fa-container { font-family: 'Vazirmatn', sans-serif; direction: rtl; }
         .lang-fa-container input, .lang-fa-container textarea { text-align: right; }
+        
+        /* MODIFIED: Ensure guide text uses correct font and direction in Persian */
+        .lang-fa-container .prose {
+            font-family: 'Vazirmatn', sans-serif;
+            direction: rtl;
+        }
+        .lang-fa-container .prose h4,
+        .lang-fa-container .prose p,
+        .lang-fa-container .prose li {
+            text-align: right;
+        }
+        .lang-fa-container .prose ul, .lang-fa-container .prose ol {
+            padding-right: 1.25rem;
+            padding-left: 0;
+        }
 
         /* General UI components - Material Expressive 3 Inspired */
         .material-card {
@@ -185,7 +200,7 @@
             0%, 100% { background-color: transparent; }
             50% { background-color: rgba(0, 105, 110, 0.1); }
         }
-        .number-update { display: inline-block; padding: 0 2px; border-radius: 4px; transition: color 0.3s ease, transform 0.3s ease, background-color 0.3s ease; }
+        .number-update { display: inline-block; padding: 0 2px; border-radius: 4px; transition: color 0.3s ease, transform 0.3s ease, background-color: 0.3s ease; }
         .number-updated { animation: number-flash 0.6s ease-out; color: #00696e; transform: scale(1.1); }
         
         @keyframes truck-container-bounce {
@@ -205,6 +220,37 @@
             transition: opacity 0.5s, transform 0.5s; pointer-events: none;
         }
         .toast-notification.show { opacity: 1; transform: translate(-50%, -10px); }
+
+        /* MODIFIED: Added animation for the help modal */
+        @keyframes open-from-icon {
+            from {
+                opacity: 0;
+                transform: scale(0.1);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes close-to-icon {
+            from {
+                opacity: 1;
+                transform: scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: scale(0.1);
+            }
+        }
+        
+        .modal-opening > .material-card {
+            animation: open-from-icon 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        
+        .modal-closing > .material-card {
+            animation: close-to-icon 0.4s cubic-bezier(0.6, 0, 0.88, 0) forwards;
+        }
 
         /* --- Responsive Adjustments for Desktop --- */
         @media (min-width: 1024px) { /* Changed from md (768px) to lg for better spacing */
@@ -283,8 +329,7 @@
     
     <script>
     function initializeGame(lang) {
-        // NOTE: API_BASE_URL is not used in this offline version, but kept for structure.
-        const API_BASE_URL = '';
+        const API_BASE_URL = './admin.php';
 
         const UIElements = {
             container: document.getElementById(`game-container-${lang}`),
@@ -336,16 +381,16 @@
                 gameTitle: "Beer Game Supply chain simulation", player: "Player", role: "Role", endGame: "End Game", week: "Week", 
                 nextWeek: "Next Week", customerDemand: "Customer Demand",
                 simulationComplete: "Simulation Complete",
-                simulationCompleteDesc: "You have successfully completed the 25-week simulation. Your report has been saved to your computer.",
+                simulationCompleteDesc: "You have successfully completed the 25-week simulation. Your report has been saved to the server.",
                 ok: "OK",
                 yourRole: "Your Role", totalCost: "Total Supply Chain Cost", playAgain: "Play Again", 
-                adminAccess: "Admin Access", adminPasswordPrompt: "Please enter the admin password.", 
+                adminAccess: "Admin Access", adminPasswordPrompt: "Please enter the admin password to view reports.", 
                 password: "Password", incorrectPassword: "Incorrect password. Please try again.", cancel: "Cancel", 
                 submit: "Submit", invalidAction: "Invalid Action", inventory: "Inventory", backlog: "Backlog", 
                 shippingPipeline: "Shipping Pipeline", arrivingNextWeek: "Arriving Next Week", weeklyCost: "Weekly Cost", 
                 totalCostHeader: "Total Cost", productionOrder: "Start Production", placeOrder: "Place Your Order", 
-                orderPlaceholder: "e.g., 8", adminPanelTitle: "Admin Panel", back: "Back", 
-                loadingReports: "Loading reports...", noReports: "No reports found.", date: "Date", 
+                orderPlaceholder: "e.g., 8", adminPanelTitle: "Admin Panel: Game Reports", back: "Back", 
+                loadingReports: "Loading reports from server...", noReports: "No game reports found on the server.", date: "Date", 
                 downloadCSV: "Download CSV", gameSettings: "Game Settings", playerName: "Player Name", 
                 sanctionsEnabled: "Sanctions Enabled", tariffsEnabled: "Tariffs Enabled", yes: "Yes", no: "No", 
                 order: "Order", incoming: "Incoming", errorEnterName: "Please enter a name to start the game.", 
@@ -353,13 +398,13 @@
                 errorInvalidName: "Please use only letters and spaces in your name.",
                 roleFactory: "Factory", roleDistributor: "Distributor", roleWholesaler: "Wholesaler", roleRetailer: "Retailer",
                 selectAll: "Select All", deleteSelected: "Delete Selected",
-                confirmDelete: "Are you sure you want to delete the selected reports?",
+                confirmDelete: "Are you sure you want to delete the selected reports from the server?",
                 noReportsSelected: "No reports selected for deletion.", delete: "Delete",
                 errorServer: "Could not connect to the server. Please check your internet connection and the server script.",
                 downloadSelectedZip: "Download Selected as ZIP",
                 noReportsSelectedZip: "No reports selected for download.",
-                reportSavedOnline: "Report successfully downloaded to your computer.",
-                reportSavedLocally: "Could not download report. An error occurred.",
+                reportSavedOnline: "Your game data has been saved to the server.",
+                reportSavedLocally: "Game report could not be saved to server. Check connection.",
                 outgoing: "Outgoing",
                 howToPlay: "How to Play",
                 howToPlayDesc: "Welcome to the supply chain! Your goal is to keep costs low. Each week, you'll ship goods and order more to restock. Inventory costs $0.50 per unit, while backlogs (unfulfilled orders) cost $1.00. Smart ordering is key to winning!",
@@ -379,22 +424,55 @@
                 chartInventory: "Inventory",
                 chartBacklog: "Backlog",
                 chartDemand: "Incoming Demand",
-                chartYourOrder: "Your Placed Order"
+                chartYourOrder: "Your Placed Order",
+                howToPlayTitle: "How to Play the Beer Game",
+                howToPlayInstructions: `
+                    <h4 class="font-bold text-lg mb-2">The Goal</h4>
+                    <p class="mb-4">Your mission is to manage your link in the supply chain (e.g., Retailer) as efficiently as possible for 25 weeks. The goal is to meet customer demand while keeping your total costs—from holding inventory and from running out of stock—as low as possible. The player with the lowest total cost wins!</p>
+                    <h4 class="font-bold text-lg mb-2">The Rules of the Game</h4>
+                    <ul class="list-disc list-inside space-y-2 mb-4">
+                        <li><b>You can't communicate:</b> You cannot talk to the other players in the supply chain. You only see the orders you receive from your direct customer.</li>
+                        <li><b>Delays are real:</b> There is a <strong>2-week delay</strong> for orders to travel up the chain and another <strong>2-week delay</strong> for shipments to travel down. You must account for this 4-week lead time!</li>
+                        <li><b>Costs are everything:</b>
+                            <ul class="list-[circle] list-inside ml-4 mt-1">
+                                <li>Inventory Cost: <strong>$0.50</strong> per unit per week.</li>
+                                <li>Backlog (Out of Stock) Cost: <strong>$1.00</strong> per unit per week.</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <h4 class="font-bold text-lg mb-2">Your Weekly Steps</h4>
+                    <ol class="list-decimal list-inside space-y-2 mb-4">
+                        <li><b>Shipments Arrive:</b> Your order from two weeks ago arrives and is added to your inventory.</li>
+                        <li><b>Fulfill Demand:</b> You automatically ship products to your customer based on the order they placed two weeks ago. If you don't have enough, you'll have a backlog.</li>
+                        <li><b>Place Your Order:</b> This is your most important decision! Look at your current inventory, your backlog, and the orders coming in, then place a new order with your supplier.</li>
+                    </ol>
+                    <h4 class="font-bold text-lg mb-2">Geopolitical Effects</h4>
+                    <p class="mb-4">You can choose to play with these optional challenges that add new rules:</p>
+                    <ul class="list-disc list-inside space-y-2 mb-4">
+                        <li><b>Sanctions:</b> If active, your shipping delay from your supplier increases by <strong>+1 week</strong> (from 2 to 3 weeks). This increases your total lead time and requires you to think further ahead.</li>
+                        <li><b>Tariffs:</b> If active, a <strong>+25% cost</strong> is added to every order you place. This simulates a tax and will increase your weekly costs, forcing you to be more careful with your ordering.</li>
+                    </ul>
+                    <h4 class="font-bold text-lg mb-2">Beware the Bullwhip Effect!</h4>
+                    <p>Small changes in demand from the end-customer can become wildly amplified as they move up the supply chain. A tiny ripple can become a huge wave. This is the "Bullwhip Effect". Your challenge is to avoid overreacting and keep the supply chain stable.</p>
+                `,
+                skip: "Skip",
+                startGameBtn: "Start Game",
+                close: "Close",
             },
             fa: {
                 gameTitle: "شبیه ساز زنجیره تامین", player: "بازیکن", role: "نقش", endGame: "پایان بازی", week: "هفته", 
                 nextWeek: "هفته بعد", customerDemand: "تقاضای مشتری",
                 simulationComplete: "شبیه‌سازی کامل شد",
-                simulationCompleteDesc: "شما شبیه‌سازی ۲۵ هفته‌ای را با موفقیت به پایان رساندید. گزارش شما در کامپیوترتان ذخیره شد.",
+                simulationCompleteDesc: "شما شبیه‌سازی ۲۵ هفته‌ای را با موفقیت به پایان رساندید. گزارش شما در سرور ذخیره شد.",
                 ok: "باشه",
                 yourRole: "نقش شما", totalCost: "هزیه کل زنجیره تأمین", playAgain: "بازی دوباره", 
-                adminAccess: "دسترسی ادمین", adminPasswordPrompt: "لطفاً رمز عبور ادمین را وارد کنید.", 
+                adminAccess: "دسترسی ادمین", adminPasswordPrompt: "لطفاً برای مشاهده گزارش‌ها رمز عبور ادمین را وارد کنید.", 
                 password: "رمز عبور", incorrectPassword: "رمز عبور اشتباه است. لطفاً دوباره تلاش کنید.", cancel: "لغو", 
                 submit: "تأیید", invalidAction: "عملیات نامعتبر", inventory: "موجودی", backlog: "کسری", 
                 shippingPipeline: "محموله‌های در راه", arrivingNextWeek: "ورودی هفته آینده", weeklyCost: "هزینه هفتگی", 
                 totalCostHeader: "هزینه کل", productionOrder: "شروع تولید", placeOrder: "ثبت سفارش", 
-                orderPlaceholder: "مثال: ۸", adminPanelTitle: "پنل ادمین", back: "بازگشت", 
-                loadingReports: "در حال بارگذاری گزارش‌ها...", noReports: "هیچ گزارشی یافت نشد.", date: "تاریخ", 
+                orderPlaceholder: "مثال: ۸", adminPanelTitle: "پنل ادمین: گزارش‌های بازی", back: "بازگشت", 
+                loadingReports: "در حال بارگذاری گزارش‌ها از سرور...", noReports: "هیچ گزارشی در سرور یافت نشد.", date: "تاریخ", 
                 downloadCSV: "دانلود CSV", gameSettings: "تنظیمات بازی", playerName: "نام بازیکن", 
                 sanctionsEnabled: "تحریم‌ها فعال", tariffsEnabled: "تعرفه‌ها فعال", yes: "بله", no: "خیر", 
                 order: "سفارش", incoming: "ورودی", errorEnterName: "لطفا برای شروع بازی یک نام وارد کنید.", 
@@ -402,13 +480,13 @@
                 errorInvalidName: "لطفا در نام خود فقط از حروف و فاصله استفاده کنید.",
                 roleFactory: "کارخانه", roleDistributor: "توزیع‌کننده", roleWholesaler: "عمده‌فروش", roleRetailer: "خرده‌فروش",
                 selectAll: "انتخاب همه", deleteSelected: "حذف موارد انتخابی",
-                confirmDelete: "آیا از حذف گزارش‌های انتخاب شده مطمئن هستید؟",
+                confirmDelete: "آیا از حذف گزارش‌های انتخاب شده از سرور مطمئن هستید؟",
                 noReportsSelected: "هیچ گزارشی برای حذف انتخاب نشده است.", delete: "حذف",
                 errorServer: "امکان اتصال به سرور وجود ندارد. لطفا اتصال اینترنت و اسکریپت سرور را بررسی کنید.",
                 downloadSelectedZip: "دانلود منتخب به صورت ZIP",
                 noReportsSelectedZip: "هیچ گزارشی برای دانلود انتخاب نشده است.",
-                reportSavedOnline: "گزارش با موفقیت در کامپیوتر شما دانلود شد.",
-                reportSavedLocally: "امکان دانلود گزارش وجود نداشت. خطایی رخ داد.",
+                reportSavedOnline: "اطلاعات بازی شما در سرور ذخیره شد.",
+                reportSavedLocally: "امکان ذخیره گزارش در سرور وجود نداشت. اتصال را بررسی کنید.",
                 outgoing: "ارسالی",
                 howToPlay: "راهنمای بازی",
                 howToPlayDesc: "به زنجیره تامین خوش آمدید! هدف شما پایین نگه داشتن هزینه‌هاست. هر هفته، کالا ارسال می‌کنید و برای پر کردن انبار سفارش جدید می‌دهید. هزینه موجودی ۵۰۰ تومان و هزینه کسری ۱۰۰۰ تومان است. سفارش هوشمندانه کلید پیروزی است!",
@@ -428,7 +506,41 @@
                 chartInventory: "موجودی",
                 chartBacklog: "کسری",
                 chartDemand: "تقاضای ورودی",
-                chartYourOrder: "سفارش شما"
+                chartYourOrder: "سفارش شما",
+                howToPlayTitle: "راهنمای بازی",
+                // MODIFIED: Rewrote Persian instructions to be more fluent and friendly
+                howToPlayInstructions: `
+                    <h4 class="font-bold text-lg mb-2">هدف شما در بازی</h4>
+                    <p class="mb-4">مأموریت شما اینه که نقش خودتون در زنجیره تأمین (مثلاً خرده‌فروش) رو به بهترین شکل ممکن برای ۲۵ هفته مدیریت کنید. هدف اصلی، پاسخ به تقاضای مشتری و همزمان، به حداقل رسوندن هزینه‌های کل هست؛ یعنی هم هزینه نگهداری موجودی و هم هزینه نداشتن کالا در انبار (کسری). در نهایت، بازیکنی که کمترین هزینه کل رو داشته باشه، برنده بازی می‌شه!</p>
+                    <h4 class="font-bold text-lg mb-2">قوانین بازی</h4>
+                    <ul class="list-disc list-inside space-y-2 mb-4">
+                        <li><b>ارتباط ممنوعه!</b> شما نمی‌تونید با بقیه بازیکن‌ها صحبت کنید. تنها اطلاعات شما، سفارش‌هایی هست که از مشتری مستقیم خودتون دریافت می‌کنید.</li>
+                        <li><b>تأخیرها رو جدی بگیرید!</b> ارسال سفارش شما به تأمین‌کننده ۲ هفته و دریافت محموله از اون هم ۲ هفته طول می‌کشه. پس همیشه باید برای یک بازه زمانی ۴ هفته‌ای برنامه‌ریزی کنید.</li>
+                        <li><b>هزینه‌ها حرف اول رو می‌زنن:</b>
+                            <ul class="list-[circle] list-inside mr-4 mt-1">
+                                <li>هزینه نگهداری موجودی: هر واحد کالا در انبار، هفته‌ای <strong>۵۰۰ تومان</strong>.</li>
+                                <li>هزینه کسری انبار: هر واحد کسری (سفارشی که نتونستید تحویل بدید)، هفته‌ای <strong>۱۰۰۰ تومان</strong>.</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <h4 class="font-bold text-lg mb-2">مراحل هفتگی شما</h4>
+                    <ol class="list-decimal list-inside space-y-2 mb-4">
+                        <li><b>رسیدن محموله‌ها:</b> سفارشی که دو هفته قبل ثبت کردید از راه می‌رسه و به موجودی انبار شما اضافه می‌شه.</li>
+                        <li><b>پاسخ به تقاضا:</b> سیستم به طور خودکار، بر اساس سفارش دو هفته پیش مشتری شما، براش کالا ارسال می‌کنه. اگه موجودی کافی نداشته باشید، کسری براتون ثبت می‌شه.</li>
+                        <li><b>ثبت سفارش جدید:</b> این مهم‌ترین تصمیم هر هفته شماست! با توجه به موجودی فعلی، کسری انبار و سفارش‌های در راه، سفارش جدیدتون رو برای تأمین‌کننده ثبت کنید.</li>
+                    </ol>
+                    <h4 class="font-bold text-lg mb-2">اثرات ژئوپلیتیکی</h4>
+                    <p class="mb-4">می‌تونید بازی رو با این چالش‌های اختیاری جذاب‌تر کنید:</p>
+                    <ul class="list-disc list-inside space-y-2 mb-4">
+                        <li><b>تحریم‌ها:</b> اگه فعال باشه، تأخیر ارسال محموله از طرف تأمین‌کننده شما <strong>۱ هفته</strong> بیشتر می‌شه (یعنی از ۲ به ۳ هفته). این یعنی باید آینده‌نگری بیشتری داشته باشید.</li>
+                        <li><b>تعرفه‌ها:</b> اگه فعال باشه، هزینه هر سفارشی که ثبت می‌کنید <strong>۲۵٪</strong> بیشتر می‌شه. این حالت مثل یک مالیات عمل می‌کنه و هزینه‌های هفتگی شما رو بالا می‌بره، پس باید در سفارش‌هاتون دقیق‌تر باشید.</li>
+                    </ul>
+                    <h4 class="font-bold text-lg mb-2">مراقب «اثر شلاقی» باشید!</h4>
+                    <p>نوسانات کوچک در تقاضای مشتری نهایی، هرچقدر در زنجیره تأمین بالاتر می‌ره، بزرگ‌تر و شدیدتر می‌شه. یک موج کوچک به یک موج عظیم تبدیل می‌شه! این پدیده همون «اثر شلاقی» معروفه. چالش اصلی شما اینه که از واکنش‌های هیجانی و بیش از حد به این نوسانات پرهیز کنید و ثبات رو در زنجیره نگه دارید.</p>
+                `,
+                skip: "رد شدن",
+                startGameBtn: "شروع بازی",
+                close: "بستن",
             }
         };
         const i18n = langData[lang];
@@ -547,12 +659,19 @@
             const html = `
                 <div id="toast-notification-${lang}" class="toast-notification"></div>
                 <div id="game-interface-${lang}" class="hidden max-w-7xl h-full w-full mx-auto p-2 sm:p-4 flex flex-col gap-2 sm:gap-4">
-                    <header class="flex flex-wrap flex-row justify-between items-center gap-2 flex-shrink-0">
-                        <div>
-                            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900">${i18n.gameTitle}</h1>
-                            <p class="text-sm sm:text-base text-slate-600">${i18n.player}: <span id="player-name-display-${lang}" class="font-bold"></span> | ${i18n.role}: <span id="player-role-${lang}" class="font-bold text-cyan-700"></span></p>
+                    <header class="material-card !rounded-2xl p-4 flex flex-wrap flex-row justify-between items-center gap-4 flex-shrink-0">
+                        <div class="flex-1 min-w-0">
+                            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 truncate">${i18n.gameTitle}</h1>
+                            <p class="text-sm sm:text-base text-slate-600 truncate">${i18n.player}: <span id="player-name-display-${lang}" class="font-bold"></span> | ${i18n.role}: <span id="player-role-${lang}" class="font-bold text-cyan-700"></span></p>
                         </div>
-                        <button id="end-game-btn-${lang}" type="button" class="material-button-outlined">${i18n.endGame}</button>
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <button id="end-game-btn-${lang}" type="button" class="material-button-outlined">${i18n.endGame}</button>
+                            <button id="show-how-to-play-btn-${lang}" title="${i18n.howToPlay}" class="w-12 h-12 bg-cyan-600 text-white rounded-full shadow-lg hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 flex items-center justify-center transition-all duration-300 transform hover:scale-110">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </button>
+                        </div>
                     </header>
                     
                     <div class="material-card p-2 sm:p-4 hidden md:block flex-shrink-0"><div class="flex items-center w-full">${mapHTML(false)}</div></div>
@@ -581,17 +700,25 @@
         }
         
         function createModal(id, title, content, buttons) {
-            if (document.getElementById(id)) {
-                document.getElementById(id).remove();
+            const modalId = id.replace(/-/g, '');
+            if (document.getElementById(modalId)) {
+                document.getElementById(modalId).remove();
             }
             const modal = document.createElement('div');
-            modal.id = id;
-            modal.className = 'fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4 fade-in hidden';
+            modal.id = modalId;
+            // MODIFIED: Added language container class to modal to ensure correct styling for all languages
+            modal.className = `fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 hidden lang-${lang}-container`;
+            
             modal.innerHTML = `
-                <div class="material-card p-6 sm:p-8 w-full max-w-md space-y-6 no-hover">
-                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">${title}</h2>
-                    <div>${content}</div>
-                    <div class="flex justify-end gap-2">${buttons}</div>
+                <div class="material-card p-6 sm:p-8 w-full max-w-2xl space-y-6 no-hover overflow-y-auto max-h-[90vh] relative">
+                    <button id="modal-close-x-btn-${modalId}" class="hidden absolute top-4 ${lang === 'fa' ? 'left-4' : 'right-4'} text-slate-400 hover:text-slate-800 transition-colors">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                         </svg>
+                    </button>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 pr-10 ${lang === 'fa' ? 'pl-10 pr-0' : ''}">${title}</h2>
+                    <div class="prose prose-slate max-w-none text-slate-600">${content}</div>
+                    <div class="flex justify-end gap-2 pt-4 border-t">${buttons}</div>
                 </div>
             `;
             document.body.appendChild(modal);
@@ -777,13 +904,78 @@
 
         function startGame() {
             playerName = UIElements.playerNameInput.value.trim();
-            // const nameRegex = /^[a-zA-Z\s\u0600-\u06FF\u067E\u0686\u06AF\u0698]+$/; // Validation removed to allow numbers and symbols
             if (playerName === '') { showError("errorEnterName"); return; }
-            // if (!nameRegex.test(playerName)) { showError("errorInvalidName"); return; } // Validation removed
             playerRole = document.querySelector(`input[name="role-${lang}"]:checked`).value;
             sanctionsActive = document.getElementById(`sanctions-toggle-${lang}`).checked;
             tariffsActive = document.getElementById(`tariffs-toggle-${lang}`).checked;
             
+            showHowToPlay(true);
+        }
+        
+        function showHowToPlay(isInitial = false) {
+            let buttons;
+            if (isInitial) {
+                buttons = `
+                    <button id="skip-instructions-btn-${lang}" class="material-button-text">${i18n.skip}</button>
+                    <button id="start-game-instructions-btn-${lang}" class="material-button-filled">${i18n.startGameBtn}</button>
+                `;
+            } else {
+                buttons = `<button id="close-instructions-btn-${lang}" class="material-button-filled">${i18n.close}</button>`;
+            }
+            
+            const modal = createModal(`how-to-play-modal-${lang}`, i18n.howToPlayTitle, i18n.howToPlayInstructions, buttons);
+            const modalContent = modal.querySelector('.material-card');
+
+            // --- Animation logic ---
+            // Set the transform origin based on where the help button is
+            if (!isInitial) {
+                const helpButton = document.getElementById(`show-how-to-play-btn-${lang}`);
+                const rect = helpButton.getBoundingClientRect();
+                // MODIFIED: Adjust animation origin for RTL layout
+                let originX;
+                if (lang === 'fa') {
+                    originX = rect.left + (rect.width / 2);
+                } else {
+                    originX = rect.right - (rect.width / 2);
+                }
+                const originY = rect.top + (rect.height / 2);
+                modalContent.style.transformOrigin = `${originX}px ${originY}px`;
+            } else {
+                // Default origin to the center if it's the initial tutorial
+                modalContent.style.transformOrigin = 'center center';
+            }
+
+            // Open the modal with animation
+            modal.classList.remove('hidden', 'modal-closing');
+            modal.classList.add('modal-opening');
+            
+            const closeXBtn = document.getElementById(`modal-close-x-btn-${modal.id}`);
+
+            // Close the modal with animation
+            const closeModal = () => {
+                modal.classList.remove('modal-opening');
+                modal.classList.add('modal-closing');
+                modal.addEventListener('animationend', () => {
+                    modal.classList.add('hidden');
+                }, { once: true });
+            };
+            
+            if (isInitial) {
+                const startGameAction = () => {
+                    closeModal();
+                    // Give the closing animation time to finish before showing the game screen
+                    setTimeout(initializeAndDisplayGame, 400); 
+                };
+                document.getElementById(`skip-instructions-btn-${lang}`).addEventListener('click', startGameAction);
+                document.getElementById(`start-game-instructions-btn-${lang}`).addEventListener('click', startGameAction);
+            } else {
+                 closeXBtn.classList.remove('hidden');
+                 closeXBtn.addEventListener('click', closeModal);
+                document.getElementById(`close-instructions-btn-${lang}`).addEventListener('click', closeModal);
+            }
+        }
+
+        function initializeAndDisplayGame() {
             UIElements.startScreen.classList.add('hidden');
             createMainInterface();
             bindGameEventListeners();
@@ -827,6 +1019,7 @@
             createPerformanceChart();
             updateUI(false);
         }
+
 
         // --- Core game logic ---
         function advanceWeek() {
@@ -993,6 +1186,7 @@
             UIElements.gameInterface = document.getElementById(`game-interface-${lang}`);
             document.getElementById(`next-week-btn-${lang}`).addEventListener('click', advanceWeek);
             document.getElementById(`end-game-btn-${lang}`).addEventListener('click', showGameOver);
+            document.getElementById(`show-how-to-play-btn-${lang}`).addEventListener('click', () => showHowToPlay(false));
         }
         
         function showError(messageKey) { UIElements.errorMessageText.textContent = i18n[messageKey]; UIElements.errorModal.classList.remove('hidden'); }
@@ -1019,13 +1213,24 @@
             const password = passInput.value;
             const errorEl = document.getElementById(`admin-password-error-${lang}`);
             errorEl.classList.add('hidden');
-            
-            // OFFLINE CHANGE: Check password directly without server
-            if (password === 'admin123') {
-                adminPassword = password; // Store password for this session
-                document.getElementById(`admin-password-modal-${lang}`).classList.add('hidden');
-                showAdminPanel();
-            } else {
+
+            try {
+                const response = await fetch(`${API_BASE_URL}?action=login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+
+                if (response.ok) {
+                    adminPassword = password; // Store password for this session
+                    document.getElementById(`admin-password-modal-${lang}`).classList.add('hidden');
+                    showAdminPanel();
+                } else {
+                    errorEl.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error("Login failed:", error);
+                errorEl.textContent = i18n.errorServer;
                 errorEl.classList.remove('hidden');
             }
         }
@@ -1035,19 +1240,15 @@
             const csvContent = generateCSVContent(report);
             const reportName = `beer_game_${playerName.replace(/\s+/g, '_') || 'anon'}_${Date.now()}.csv`;
 
-            // OFFLINE CHANGE: Trigger a local download instead of sending to server
             try {
-                const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement("a");
-                if (link.download !== undefined) {
-                    const url = URL.createObjectURL(blob);
-                    link.setAttribute("href", url);
-                    link.setAttribute("download", reportName);
-                    link.style.visibility = 'hidden';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                }
+                const response = await fetch(`${API_BASE_URL}?action=save`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reportName, reportData: csvContent })
+                });
+
+                if (!response.ok) throw new Error('Server responded with an error.');
+                
                 showToast(i18n.reportSavedOnline, true);
             } catch (error) {
                 console.error('Could not save report to server:', error);
@@ -1073,7 +1274,18 @@
                     <h1 class="text-3xl sm:text-4xl font-bold text-slate-900">${i18n.adminPanelTitle}</h1>
                     <button id="back-to-start-btn-${lang}" class="material-button-text">${i18n.back}</button>
                 </div>
+                <div id="admin-controls-${lang}" class="hidden material-card p-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="select-all-reports-${lang}" class="h-5 w-5 rounded border-gray-300 text-cyan-600 focus:ring-cyan-500">
+                        <label for="select-all-reports-${lang}" class="ml-2 font-semibold cursor-pointer">${i18n.selectAll}</label>
+                    </div>
+                    <div class="flex gap-2 flex-wrap justify-center">
+                        <button id="download-selected-zip-btn-${lang}" class="material-button-outlined">${i18n.downloadSelectedZip}</button>
+                        <button id="delete-selected-reports-btn-${lang}" class="material-button-outlined border-red-500 text-red-600 hover:bg-red-50">${i18n.deleteSelected}</button>
+                    </div>
+                </div>
                 <div class="material-card p-4">
+                     <p id="loading-reports-${lang}" class="text-slate-500">${i18n.loadingReports}</p>
                      <div id="reports-list-${lang}" class="space-y-3"></div>
                 </div>
             </div>`;
@@ -1090,11 +1302,91 @@
         }
         
         async function loadAndDisplayReports() {
-             // OFFLINE CHANGE: Display a message instead of fetching reports.
              const reportsListEl = document.getElementById(`reports-list-${lang}`);
-             const offlineMessageEn = `This is an offline version of the game. Game reports are downloaded directly to your computer at the end of each simulation. There are no server reports to display here.`;
-             const offlineMessageFa = `این یک نسخه آفلاین از بازی است. گزارش‌های بازی در پایان هر شبیه‌سازی مستقیماً در رایانه شما دانلود می‌شوند. گزارشی برای نمایش در اینجا وجود ندارد.`;
-             reportsListEl.innerHTML = `<p class="p-4 text-slate-600">${lang === 'fa' ? offlineMessageFa : offlineMessageEn}</p>`;
+             const loadingEl = document.getElementById(`loading-reports-${lang}`);
+             const adminControls = document.getElementById(`admin-controls-${lang}`);
+             
+             try {
+                const response = await fetch(`${API_BASE_URL}?action=list&password=${encodeURIComponent(adminPassword)}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch reports. Check password or server script.');
+                }
+                allFetchedReports = await response.json();
+             } catch(error) {
+                console.error(error);
+                loadingEl.textContent = i18n.errorServer;
+                adminControls.classList.add('hidden');
+                return;
+             }
+
+             if (allFetchedReports.length === 0) {
+                 loadingEl.textContent = i18n.noReports;
+                 adminControls.classList.add('hidden');
+                 return;
+             }
+             
+             loadingEl.classList.add('hidden');
+             adminControls.classList.remove('hidden');
+             reportsListEl.innerHTML = '';
+
+             allFetchedReports.forEach(report => {
+                 const gregorianDate = new Date(report.modified).toLocaleString();
+                 const shamsiDate = new Date(report.modified).toLocaleDateString('fa-IR');
+                 // Extract info from filename: beer_game_Player_Name_timestamp.csv
+                 const parts = report.filename.replace('.csv', '').split('_');
+                 const rPlayerName = parts.slice(2, -1).join(' ') || 'Anonymous';
+                 
+                 const reportEl = document.createElement('div');
+                 reportEl.className = 'report-item flex flex-col md:flex-row justify-between items-start md:items-center p-4 border-b last:border-b-0';
+                 reportEl.innerHTML = `
+                     <div class="flex items-center flex-grow w-full md:w-auto mb-3 md:mb-0">
+                         <input type="checkbox" value="${report.filename}" class="report-checkbox-${lang} h-5 w-5 rounded border-gray-300 text-cyan-600 focus:ring-cyan-500 self-center">
+                         <div class="flex-grow ${lang === 'fa' ? 'mr-4' : 'ml-4'}">
+                             <p class="font-semibold">${i18n.playerName}: <span class="font-normal">${rPlayerName}</span></p>
+                             <p class="text-sm text-slate-600">${i18n.date}: ${gregorianDate} ${lang === 'fa' ? `(${shamsiDate})` : ''}</p>
+                         </div>
+                     </div>
+                     <button class="download-btn material-button-text w-full md:w-auto">${i18n.downloadCSV}</button>`;
+                 reportEl.querySelector('.download-btn').addEventListener('click', () => downloadSingleReport(report.filename));
+                 reportsListEl.appendChild(reportEl);
+             });
+             
+             document.getElementById(`select-all-reports-${lang}`).addEventListener('click', (e) => {
+                 document.querySelectorAll(`.report-checkbox-${lang}`).forEach(c => c.checked = e.target.checked);
+             });
+             document.getElementById(`delete-selected-reports-btn-${lang}`).addEventListener('click', () => {
+                const confirmModal = createModal(`confirm-modal-${lang}`, i18n.confirmDelete, `<p class="text-slate-600">${i18n.confirmDelete}</p>`, `<button id="cancel-confirm-btn-${lang}" class="material-button-text">${i18n.cancel}</button><button id="confirm-delete-btn-${lang}" class="material-button-filled bg-red-600 hover:bg-red-700">${i18n.delete}</button>`);
+                
+                 if (document.querySelectorAll(`.report-checkbox-${lang}:checked`).length > 0) {
+                     confirmModal.classList.remove('hidden');
+                     document.getElementById(`cancel-confirm-btn-${lang}`).onclick = () => confirmModal.classList.add('hidden');
+                     document.getElementById(`confirm-delete-btn-${lang}`).onclick = () => {
+                         handleDeleteSelectedReports();
+                         confirmModal.classList.add('hidden');
+                     };
+                 } else {
+                     showError('noReportsSelected');
+                 }
+             });
+             document.getElementById(`download-selected-zip-btn-${lang}`).addEventListener('click', downloadSelectedReportsAsZip);
+        }
+
+        async function handleDeleteSelectedReports() {
+            const selectedFilenames = Array.from(document.querySelectorAll(`.report-checkbox-${lang}:checked`)).map(cb => cb.value);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}?action=delete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: adminPassword, filenames: selectedFilenames })
+                });
+                if (!response.ok) throw new Error('Failed to delete files.');
+                await response.json(); // Wait for the body to be read
+            } catch (error) {
+                console.error(error);
+                showError('errorServer');
+            }
+            loadAndDisplayReports(); // Refresh the list
         }
 
         function generateCSVContent(report) {
@@ -1104,7 +1396,7 @@
             csvContent += `${langDict.playerName}:,"${report.playerName || 'Anonymous'}"\r\n`;
             csvContent += `${langDict.role}:,"${langDict['role' + (report.role)] || report.role}"\r\n`;
             csvContent += `${langDict.sanctionsEnabled}:,${report.sanctions ? langDict.yes : langDict.no}\r\n`;
-            csvContent += `${langDict.tariffsEnabled}:,${report.tariffs ? langDict.yes : langDict.no}\r-n\r\n`;
+            csvContent += `${langDict.tariffsEnabled}:,${report.tariffs ? langDict.yes : langDict.no}\r\n\r\n`;
             const headers = [langDict.week, langDict.customerDemand, ...roles.flatMap(r => [`${langDict['role' + r]}_${langDict.inventory}`, `${langDict['role' + r]}_${langDict.backlog}`, `${langDict['role' + r]}_${langDict.incoming}`, `${langDict['role' + r]}_${langDict.order}`, `${langDict['role' + r]}_${langDict.weeklyCost}`, `${langDict['role' + r]}_${langDict.totalCostHeader}`])];
             csvContent += headers.join(",") + "\r\n";
             report.history.forEach(row => {
@@ -1117,7 +1409,44 @@
             });
             return csvContent;
         }
-        
+
+        function downloadSingleReport(filename) {
+            window.location.href = `${API_BASE_URL}?action=download&file=${encodeURIComponent(filename)}&password=${encodeURIComponent(adminPassword)}`;
+        }
+
+        async function downloadSelectedReportsAsZip() {
+            const selectedFilenames = Array.from(document.querySelectorAll(`.report-checkbox-${lang}:checked`)).map(cb => cb.value);
+            if (selectedFilenames.length === 0) { showError('noReportsSelectedZip'); return; }
+
+            const zip = new JSZip();
+            
+            // Show a loading indicator if you have one
+            try {
+                for (const filename of selectedFilenames) {
+                    const response = await fetch(`${API_BASE_URL}?action=download&file=${encodeURIComponent(filename)}&password=${encodeURIComponent(adminPassword)}`);
+                    if (!response.ok) {
+                        console.error(`Failed to fetch ${filename} for zipping.`);
+                        continue; // Skip this file
+                    }
+                    const fileContent = await response.text();
+                    zip.file(filename, fileContent);
+                }
+
+                const content = await zip.generateAsync({ type: "blob" });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(content);
+                link.download = "beer_game_reports.zip";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } catch (error) {
+                 console.error("Zipping failed:", error);
+                 showError('errorServer');
+            }
+            // Hide loading indicator
+        }
+
+
         // --- Initial Setup ---
         createStartScreen();
         setupModals();
@@ -1177,3 +1506,6 @@
 
 </body>
 </html>
+
+
+
