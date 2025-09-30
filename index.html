@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beer Game Supply chain simulation</title>
+    <title>Beer Game Supply Chain Simulation</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <!-- ADDED: Chart.js library for performance chart -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- MODIFIED: Replaced EB Garamond with Roboto for a Material Design font style -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;900&family=Manrope:wght@400;600;700;800&family=Vazirmatn:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         /* Base Styles */
@@ -38,7 +36,6 @@
         .lang-fa-container { font-family: 'Vazirmatn', sans-serif; direction: rtl; }
         .lang-fa-container input, .lang-fa-container textarea { text-align: right; }
         
-        /* MODIFIED: Ensure guide text uses correct font and direction in Persian */
         .lang-fa-container .prose {
             font-family: 'Vazirmatn', sans-serif;
             direction: rtl;
@@ -57,11 +54,10 @@
         .material-card {
             background-color: #fdfdff;
             color: #191c1d;
-            /* Expressive Shape: Varied corner radius */
             border-radius: 28px 28px 12px 12px;
             border: 1px solid #dbe4e6;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1.5); /* Bouncier animation */
-            box-shadow: 0 8px 25px rgba(0, 105, 110, 0.12), 0 3px 8px rgba(0,0,0,0.05); /* Added depth with a stronger, theme-colored shadow */
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1.5);
+            box-shadow: 0 8px 25px rgba(0, 105, 110, 0.12), 0 3px 8px rgba(0,0,0,0.05);
             position: relative;
             overflow: hidden;
         }
@@ -82,15 +78,15 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             transform: translateY(-4px);
         }
-        .material-card:hover:not(.no-hover)::before {
-            opacity: 0.04; /* State Layer on hover */
+        .material-card:hover:not(.no-hover):before {
+            opacity: 0.04;
         }
 
         .material-headline {
-            font-size: 1.85rem; /* Slightly larger */
-            font-weight: 800; /* Bolder */
+            font-size: 1.85rem;
+            font-weight: 800;
             color: #00373a;
-            letter-spacing: -0.5px; /* Expressive typography */
+            letter-spacing: -0.5px;
         }
         .material-label { font-size: 0.875rem; color: #3f4849; margin-bottom: 0.25rem; display: block; }
         .material-value { font-size: 1.75rem; font-weight: 700; color: #00696e; }
@@ -98,8 +94,8 @@
         /* --- Buttons --- */
         .material-button-filled {
             font-family: inherit; font-size: 1rem; font-weight: 700; background-color: #00696e; color: #ffffff; border-radius: 9999px;
-            padding: 0.85rem 1.75rem; /* More padding */
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); /* Expressive bounce */
+            padding: 0.85rem 1.75rem;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             border: none; cursor: pointer;
             background-image: linear-gradient(to top, rgba(255,255,255,0), rgba(255,255,255,0.1));
         }
@@ -127,13 +123,13 @@
         /* --- Input Fields --- */
         .material-input-container { position: relative; }
         .material-input {
-            width: 100%; border: 2px solid #6f797a; background-color: transparent; border-radius: 12px 12px 4px 4px; /* Expressive Shape */
+            width: 100%; border: 2px solid #6f797a; background-color: transparent; border-radius: 12px 12px 4px 4px;
             padding: 1rem; font-size: 1.125rem; color: #191c1d; transition: all 0.2s ease;
         }
         .material-input:focus, .material-input:not(:placeholder-shown) {
              border-color: #00696e;
              outline: none;
-             box-shadow: 0 0 0 2px rgba(0, 105, 110, 0.2), inset 0 2px 4px rgba(0,0,0,0.05); /* Dynamic Fill */
+             box-shadow: 0 0 0 2px rgba(0, 105, 110, 0.2), inset 0 2px 4px rgba(0,0,0,0.05);
         }
         .material-input-label {
             position: absolute; top: 1rem; left: 1rem; background-color: #fdfdff; padding: 0 0.25rem;
@@ -168,13 +164,13 @@
         /* --- Inventory & Trucks --- */
         .inventory-visual-area {
             position: relative; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 4px;
-            overflow: hidden; /* MODIFIED: Prevent visual overflows */
+            overflow: hidden;
             background-color: rgba(0, 105, 110, 0.05); border-radius: 12px;
             padding: 8px; 
-            border: 1px solid #b9c8c9; /* MODIFIED: Made border more visible */
+            border: 1px solid #b9c8c9;
             min-height: 70px; 
             margin-top: 1rem;
-            transition: all 0.3s ease-in-out; /* ADDED: Smooth transition for scaling */
+            transition: all 0.3s ease-in-out;
         }
         .inventory-item { width: 1.5rem; height: 1.5rem; }
         .truck-icon-container { position: relative; text-align: center; transition: all 0.3s ease-in-out; }
@@ -182,7 +178,7 @@
             width: 2.5rem;
             height: 2.5rem;
             transition: all 0.3s ease;
-            display: inline-block; /* Ensure transform works correctly */
+            display: inline-block;
         }
         .truck-quantity {
             position: absolute; top: -1rem; left: 50%; transform: translateX(-50%);
@@ -221,7 +217,6 @@
         }
         .toast-notification.show { opacity: 1; transform: translate(-50%, -10px); }
 
-        /* MODIFIED: Added animation for the help modal */
         @keyframes open-from-icon {
             from {
                 opacity: 0;
@@ -253,10 +248,10 @@
         }
 
         /* --- Responsive Adjustments for Desktop --- */
-        @media (min-width: 1024px) { /* Changed from md (768px) to lg for better spacing */
+        @media (min-width: 1024px) {
             .material-map-node {
-                flex-direction: column; /* Stack icon and text vertically */
-                padding: 0.75rem 1rem; /* More padding to prevent text overlap */
+                flex-direction: column;
+                padding: 0.75rem 1rem;
                 gap: 0.25rem;
                 text-align: center;
             }
@@ -273,7 +268,7 @@
             }
             .material-map-connector {
                 margin: 0 0.5rem; 
-                align-self: center; /* Center connector with the taller node */
+                align-self: center;
             }
         }
         
@@ -329,8 +324,11 @@
     
     <script>
     function initializeGame(lang) {
-        const API_BASE_URL = './admin.php';
-
+        // Detect if the game is running online (via http/https) or offline (via file://)
+        const isOnline = window.location.protocol.startsWith('http');
+        // Define the base URL for the backend API script, only used when online.
+        const API_BASE_URL = 'admin.php'; 
+        
         const UIElements = {
             container: document.getElementById(`game-container-${lang}`),
         };
@@ -366,13 +364,18 @@
         let sanctionsActive = false;
         let tariffsActive = false;
         const gameState = {};
-        let performanceChart = null; // Variable to hold the chart instance
+        let performanceChart = null; 
         const TARGET_INVENTORY = 15;
         const AI_ADJUSTMENT_STRENGTH = 0.5;
         const TARIFF_RATE = 0.25;
         const UNIT_COST = 8;
         const currencyPrefix = lang === 'fa' ? '' : '$';
         const currencySuffix = lang === 'fa' ? ' <span style="font-family: \'Vazirmatn\', sans-serif;">تومان</span>' : '';
+        // Define admin passwords for both online and offline modes
+        const adminPasswords = {
+            online: 'Ali8054farazpardaz',
+            offline: 'admin123'
+        };
         let adminPassword = null; 
         let allFetchedReports = [];
 
@@ -381,7 +384,7 @@
                 gameTitle: "Beer Game Supply chain simulation", player: "Player", role: "Role", endGame: "End Game", week: "Week", 
                 nextWeek: "Next Week", customerDemand: "Customer Demand",
                 simulationComplete: "Simulation Complete",
-                simulationCompleteDesc: "You have successfully completed the 25-week simulation. Your report has been saved to the server.",
+                simulationCompleteDesc: "You have successfully completed the 25-week simulation. Your report has been saved.",
                 ok: "OK",
                 yourRole: "Your Role", totalCost: "Total Supply Chain Cost", playAgain: "Play Again", 
                 adminAccess: "Admin Access", adminPasswordPrompt: "Please enter the admin password to view reports.", 
@@ -390,7 +393,7 @@
                 shippingPipeline: "Shipping Pipeline", arrivingNextWeek: "Arriving Next Week", weeklyCost: "Weekly Cost", 
                 totalCostHeader: "Total Cost", productionOrder: "Start Production", placeOrder: "Place Your Order", 
                 orderPlaceholder: "e.g., 8", adminPanelTitle: "Admin Panel: Game Reports", back: "Back", 
-                loadingReports: "Loading reports from server...", noReports: "No game reports found on the server.", date: "Date", 
+                loadingReports: "Loading reports...", noReports: "No game reports found.", date: "Date", 
                 downloadCSV: "Download CSV", gameSettings: "Game Settings", playerName: "Player Name", 
                 sanctionsEnabled: "Sanctions Enabled", tariffsEnabled: "Tariffs Enabled", yes: "Yes", no: "No", 
                 order: "Order", incoming: "Incoming", errorEnterName: "Please enter a name to start the game.", 
@@ -398,13 +401,13 @@
                 errorInvalidName: "Please use only letters and spaces in your name.",
                 roleFactory: "Factory", roleDistributor: "Distributor", roleWholesaler: "Wholesaler", roleRetailer: "Retailer",
                 selectAll: "Select All", deleteSelected: "Delete Selected",
-                confirmDelete: "Are you sure you want to delete the selected reports from the server?",
+                confirmDelete: "Are you sure you want to delete the selected reports?",
                 noReportsSelected: "No reports selected for deletion.", delete: "Delete",
                 errorServer: "Could not connect to the server. Please check your internet connection and the server script.",
                 downloadSelectedZip: "Download Selected as ZIP",
                 noReportsSelectedZip: "No reports selected for download.",
                 reportSavedOnline: "Your game data has been saved to the server.",
-                reportSavedLocally: "Game report could not be saved to server. Check connection.",
+                reportSavedLocally: "Game report has been saved locally.",
                 outgoing: "Outgoing",
                 howToPlay: "How to Play",
                 howToPlayDesc: "Welcome to the supply chain! Your goal is to keep costs low. Each week, you'll ship goods and order more to restock. Inventory costs $0.50 per unit, while backlogs (unfulfilled orders) cost $1.00. Smart ordering is key to winning!",
@@ -458,12 +461,14 @@
                 skip: "Skip",
                 startGameBtn: "Start Game",
                 close: "Close",
+                downloadReport: "Download Your Report",
+                offlineAdminWarning: "Download your report file. The offline admin panel may not work due to browser security restrictions on local files."
             },
             fa: {
                 gameTitle: "شبیه ساز زنجیره تامین", player: "بازیکن", role: "نقش", endGame: "پایان بازی", week: "هفته", 
                 nextWeek: "هفته بعد", customerDemand: "تقاضای مشتری",
                 simulationComplete: "شبیه‌سازی کامل شد",
-                simulationCompleteDesc: "شما شبیه‌سازی ۲۵ هفته‌ای را با موفقیت به پایان رساندید. گزارش شما در سرور ذخیره شد.",
+                simulationCompleteDesc: "شما شبیه‌سازی ۲۵ هفته‌ای را با موفقیت به پایان رساندید. گزارش شما ذخیره شد.",
                 ok: "باشه",
                 yourRole: "نقش شما", totalCost: "هزیه کل زنجیره تأمین", playAgain: "بازی دوباره", 
                 adminAccess: "دسترسی ادمین", adminPasswordPrompt: "لطفاً برای مشاهده گزارش‌ها رمز عبور ادمین را وارد کنید.", 
@@ -472,7 +477,7 @@
                 shippingPipeline: "محموله‌های در راه", arrivingNextWeek: "ورودی هفته آینده", weeklyCost: "هزینه هفتگی", 
                 totalCostHeader: "هزینه کل", productionOrder: "شروع تولید", placeOrder: "ثبت سفارش", 
                 orderPlaceholder: "مثال: ۸", adminPanelTitle: "پنل ادمین: گزارش‌های بازی", back: "بازگشت", 
-                loadingReports: "در حال بارگذاری گزارش‌ها از سرور...", noReports: "هیچ گزارشی در سرور یافت نشد.", date: "تاریخ", 
+                loadingReports: "در حال بارگذاری گزارش‌ها...", noReports: "هیچ گزارشی یافت نشد.", date: "تاریخ", 
                 downloadCSV: "دانلود CSV", gameSettings: "تنظیمات بازی", playerName: "نام بازیکن", 
                 sanctionsEnabled: "تحریم‌ها فعال", tariffsEnabled: "تعرفه‌ها فعال", yes: "بله", no: "خیر", 
                 order: "سفارش", incoming: "ورودی", errorEnterName: "لطفا برای شروع بازی یک نام وارد کنید.", 
@@ -480,13 +485,13 @@
                 errorInvalidName: "لطفا در نام خود فقط از حروف و فاصله استفاده کنید.",
                 roleFactory: "کارخانه", roleDistributor: "توزیع‌کننده", roleWholesaler: "عمده‌فروش", roleRetailer: "خرده‌فروش",
                 selectAll: "انتخاب همه", deleteSelected: "حذف موارد انتخابی",
-                confirmDelete: "آیا از حذف گزارش‌های انتخاب شده از سرور مطمئن هستید؟",
+                confirmDelete: "آیا از حذف گزارش‌های انتخاب شده مطمئن هستید؟",
                 noReportsSelected: "هیچ گزارشی برای حذف انتخاب نشده است.", delete: "حذف",
                 errorServer: "امکان اتصال به سرور وجود ندارد. لطفا اتصال اینترنت و اسکریپت سرور را بررسی کنید.",
                 downloadSelectedZip: "دانلود منتخب به صورت ZIP",
                 noReportsSelectedZip: "هیچ گزارشی برای دانلود انتخاب نشده است.",
                 reportSavedOnline: "اطلاعات بازی شما در سرور ذخیره شد.",
-                reportSavedLocally: "امکان ذخیره گزارش در سرور وجود نداشت. اتصال را بررسی کنید.",
+                reportSavedLocally: "گزارش بازی به صورت محلی ذخیره شد.",
                 outgoing: "ارسالی",
                 howToPlay: "راهنمای بازی",
                 howToPlayDesc: "به زنجیره تامین خوش آمدید! هدف شما پایین نگه داشتن هزینه‌هاست. هر هفته، کالا ارسال می‌کنید و برای پر کردن انبار سفارش جدید می‌دهید. هزینه موجودی ۵۰۰ تومان و هزینه کسری ۱۰۰۰ تومان است. سفارش هوشمندانه کلید پیروزی است!",
@@ -508,7 +513,6 @@
                 chartDemand: "تقاضای ورودی",
                 chartYourOrder: "سفارش شما",
                 howToPlayTitle: "راهنمای بازی",
-                // MODIFIED: Rewrote Persian instructions to be more fluent and friendly
                 howToPlayInstructions: `
                     <h4 class="font-bold text-lg mb-2">هدف شما در بازی</h4>
                     <p class="mb-4">مأموریت شما اینه که نقش خودتون در زنجیره تأمین (مثلاً خرده‌فروش) رو به بهترین شکل ممکن برای ۲۵ هفته مدیریت کنید. هدف اصلی، پاسخ به تقاضای مشتری و همزمان، به حداقل رسوندن هزینه‌های کل هست؛ یعنی هم هزینه نگهداری موجودی و هم هزینه نداشتن کالا در انبار (کسری). در نهایت، بازیکنی که کمترین هزینه کل رو داشته باشه، برنده بازی می‌شه!</p>
@@ -541,6 +545,8 @@
                 skip: "رد شدن",
                 startGameBtn: "شروع بازی",
                 close: "بستن",
+                downloadReport: "دانلود گزارش شما",
+                offlineAdminWarning: "فایل گزارش خود را دانلود کنید. پنل ادمین آفلاین ممکن است به دلیل محدودیت‌های امنیتی مرورگر روی فایل‌های محلی کار نکند."
             }
         };
         const i18n = langData[lang];
@@ -700,13 +706,12 @@
         }
         
         function createModal(id, title, content, buttons) {
-            const modalId = id.replace(/-/g, '');
+            const modalId = id;
             if (document.getElementById(modalId)) {
                 document.getElementById(modalId).remove();
             }
             const modal = document.createElement('div');
             modal.id = modalId;
-            // MODIFIED: Added language container class to modal to ensure correct styling for all languages
             modal.className = `fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 hidden lang-${lang}-container`;
             
             modal.innerHTML = `
@@ -926,12 +931,9 @@
             const modal = createModal(`how-to-play-modal-${lang}`, i18n.howToPlayTitle, i18n.howToPlayInstructions, buttons);
             const modalContent = modal.querySelector('.material-card');
 
-            // --- Animation logic ---
-            // Set the transform origin based on where the help button is
             if (!isInitial) {
                 const helpButton = document.getElementById(`show-how-to-play-btn-${lang}`);
                 const rect = helpButton.getBoundingClientRect();
-                // MODIFIED: Adjust animation origin for RTL layout
                 let originX;
                 if (lang === 'fa') {
                     originX = rect.left + (rect.width / 2);
@@ -941,17 +943,14 @@
                 const originY = rect.top + (rect.height / 2);
                 modalContent.style.transformOrigin = `${originX}px ${originY}px`;
             } else {
-                // Default origin to the center if it's the initial tutorial
                 modalContent.style.transformOrigin = 'center center';
             }
 
-            // Open the modal with animation
             modal.classList.remove('hidden', 'modal-closing');
             modal.classList.add('modal-opening');
             
             const closeXBtn = document.getElementById(`modal-close-x-btn-${modal.id}`);
 
-            // Close the modal with animation
             const closeModal = () => {
                 modal.classList.remove('modal-opening');
                 modal.classList.add('modal-closing');
@@ -963,7 +962,6 @@
             if (isInitial) {
                 const startGameAction = () => {
                     closeModal();
-                    // Give the closing animation time to finish before showing the game screen
                     setTimeout(initializeAndDisplayGame, 400); 
                 };
                 document.getElementById(`skip-instructions-btn-${lang}`).addEventListener('click', startGameAction);
@@ -1005,7 +1003,7 @@
                             trucksHTML += `<div id="truck-icon-container-${prefix}${lang}-${playerRole}-${i}" class="truck-icon-container">${ICONS.Truck}<span id="truck-quantity-${prefix}${lang}-${playerRole}-${i}" class="truck-quantity">0</span></div>`;
                         }
                          if(prefix === 'mobile-') {
-                           connector.style.height = `${delay * 3.5}rem`; // Dynamic height for mobile connector
+                           connector.style.height = `${delay * 3.5}rem`;
                            connector.innerHTML = `<div class="absolute inset-0 flex flex-col items-center justify-evenly">${trucksHTML}</div>`;
                         } else {
                            connector.innerHTML = `<div class="absolute inset-0 flex items-center justify-evenly">${trucksHTML}</div>`;
@@ -1023,7 +1021,6 @@
 
         // --- Core game logic ---
         function advanceWeek() {
-            // Add a guard to prevent advancing past the final week.
             if (currentWeek >= totalWeeks) return;
 
             const playerOrderInput = document.getElementById(`${playerRole}-order-${lang}`);
@@ -1090,8 +1087,8 @@
             };
 
             if (lang === 'fa') {
-                legendLabelOptions.font.size = 12; // Increase font size for Persian
-                legendLabelOptions.padding = 15;   // Add more space between items
+                legendLabelOptions.font.size = 12;
+                legendLabelOptions.padding = 15;
             }
 
             const options = {
@@ -1156,11 +1153,26 @@
         }
         
         async function showGameOver() {
-            await saveGameReport();
+            const { reportName, csvContent } = await saveGameReport();
+            let gameOverContent = `<p class="text-slate-600">${i18n.simulationCompleteDesc}</p>`;
+            
+            if (!isOnline) {
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                gameOverContent += `
+                    <div class="mt-4">
+                        <a href="${url}" download="${reportName}" class="material-button-outlined w-full text-center block">
+                            ${i18n.downloadReport}
+                        </a>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2">${i18n.offlineAdminWarning}</p>
+                `;
+            }
+
             const gameOverModal = createModal(
                 `game-over-modal-${lang}`,
                 i18n.simulationComplete,
-                `<p class="text-slate-600">${i18n.simulationCompleteDesc}</p>`,
+                gameOverContent,
                 `<button id="game-over-ok-btn-${lang}" class="material-button-filled">${i18n.ok}</button>`
             );
             gameOverModal.classList.remove('hidden');
@@ -1191,6 +1203,9 @@
         
         function showError(messageKey) { UIElements.errorMessageText.textContent = i18n[messageKey]; UIElements.errorModal.classList.remove('hidden'); }
         function hideError() { UIElements.errorModal.classList.add('hidden'); }
+        
+        // --- Admin, Saving, and Loading Logic ---
+
         function showAdminLogin() { 
             const adminPasswordModal = createModal(`admin-password-modal-${lang}`, i18n.adminAccess, `
                 <p class="text-slate-600">${i18n.adminPasswordPrompt}</p>
@@ -1205,33 +1220,52 @@
 
             document.getElementById(`cancel-admin-login-btn-${lang}`).addEventListener('click', () => adminPasswordModal.classList.add('hidden'));
             document.getElementById(`submit-admin-login-btn-${lang}`).addEventListener('click', submitAdminLogin);
-             document.getElementById(`admin-password-input-${lang}`).addEventListener('keyup', (e) => { if (e.key === 'Enter') submitAdminLogin(); });
+            document.getElementById(`admin-password-input-${lang}`).addEventListener('keyup', (e) => { if (e.key === 'Enter') submitAdminLogin(); });
         }
         
         async function submitAdminLogin() {
             const passInput = document.getElementById(`admin-password-input-${lang}`);
             const password = passInput.value;
             const errorEl = document.getElementById(`admin-password-error-${lang}`);
+            const modal = document.getElementById(`admin-password-modal-${lang}`);
             errorEl.classList.add('hidden');
 
-            try {
-                const response = await fetch(`${API_BASE_URL}?action=login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password })
-                });
+            // Online Mode: Verify password with the PHP script
+            if (isOnline) {
+                if (password !== adminPasswords.online) {
+                    errorEl.classList.remove('hidden');
+                    return;
+                }
+                try {
+                    const response = await fetch(API_BASE_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'login', password })
+                    });
 
-                if (response.ok) {
-                    adminPassword = password; // Store password for this session
-                    document.getElementById(`admin-password-modal-${lang}`).classList.add('hidden');
+                    if (response.ok) {
+                        adminPassword = password;
+                        if(modal) modal.classList.add('hidden');
+                        showAdminPanel();
+                    } else {
+                        const result = await response.json();
+                        errorEl.textContent = result.error || i18n.incorrectPassword;
+                        errorEl.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    console.error("Login request failed:", error);
+                    errorEl.textContent = i18n.errorServer;
+                    errorEl.classList.remove('hidden');
+                }
+            } else {
+                // Offline Mode: Check against the locally stored password
+                if (password === adminPasswords.offline) {
+                    adminPassword = password;
+                    if(modal) modal.classList.add('hidden');
                     showAdminPanel();
                 } else {
                     errorEl.classList.remove('hidden');
                 }
-            } catch (error) {
-                console.error("Login failed:", error);
-                errorEl.textContent = i18n.errorServer;
-                errorEl.classList.remove('hidden');
             }
         }
         
@@ -1240,20 +1274,38 @@
             const csvContent = generateCSVContent(report);
             const reportName = `beer_game_${playerName.replace(/\s+/g, '_') || 'anon'}_${Date.now()}.csv`;
 
-            try {
-                const response = await fetch(`${API_BASE_URL}?action=save`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ reportName, reportData: csvContent })
-                });
-
-                if (!response.ok) throw new Error('Server responded with an error.');
-                
-                showToast(i18n.reportSavedOnline, true);
-            } catch (error) {
-                console.error('Could not save report to server:', error);
-                showToast(i18n.reportSavedLocally, false);
+            if (isOnline) {
+                try {
+                    const response = await fetch(API_BASE_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'save', reportName, reportData: csvContent })
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Server responded with an error.');
+                    }
+                    showToast(i18n.reportSavedOnline, true);
+                } catch (error) {
+                    console.error('Could not save report to server:', error);
+                    showToast(error.message || i18n.errorServer, false);
+                }
+            } else {
+                try {
+                    let reports = JSON.parse(localStorage.getItem('beerGameReports') || '[]');
+                    reports.push({
+                        filename: reportName,
+                        content: csvContent,
+                        modified: Date.now()
+                    });
+                    localStorage.setItem('beerGameReports', JSON.stringify(reports));
+                    showToast(i18n.reportSavedLocally, true);
+                } catch(e) {
+                    console.error("Failed to save to localStorage", e);
+                    showToast("Failed to save report locally.", false);
+                }
             }
+            return { reportName, csvContent };
         }
 
         function showToast(message, isSuccess = true) {
@@ -1265,7 +1317,6 @@
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        // --- Admin Panel ---
         function showAdminPanel() {
             UIElements.startScreen.classList.add('hidden');
             const adminHTML = `
@@ -1295,7 +1346,7 @@
         }
 
         function hideAdminPanel() {
-             adminPassword = null; // Clear password on exit
+             adminPassword = null;
              UIElements.container.innerHTML = '';
              createStartScreen();
              bindStartEventListeners();
@@ -1306,17 +1357,25 @@
              const loadingEl = document.getElementById(`loading-reports-${lang}`);
              const adminControls = document.getElementById(`admin-controls-${lang}`);
              
-             try {
-                const response = await fetch(`${API_BASE_URL}?action=list&password=${encodeURIComponent(adminPassword)}`);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch reports. Check password or server script.');
+             if (isOnline) {
+                try {
+                    // For online mode, the password must be passed for authentication
+                    const response = await fetch(`${API_BASE_URL}?action=list&password=${encodeURIComponent(adminPassword)}`);
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Failed to fetch reports.');
+                    }
+                    allFetchedReports = await response.json();
+                } catch(error) {
+                    console.error(error);
+                    loadingEl.textContent = error.message || i18n.errorServer;
+                    adminControls.classList.add('hidden');
+                    return;
                 }
-                allFetchedReports = await response.json();
-             } catch(error) {
-                console.error(error);
-                loadingEl.textContent = i18n.errorServer;
-                adminControls.classList.add('hidden');
-                return;
+             } else {
+                // For offline mode, reports are loaded from localStorage
+                allFetchedReports = JSON.parse(localStorage.getItem('beerGameReports') || '[]');
+                allFetchedReports.sort((a, b) => b.modified - a.modified);
              }
 
              if (allFetchedReports.length === 0) {
@@ -1332,7 +1391,6 @@
              allFetchedReports.forEach(report => {
                  const gregorianDate = new Date(report.modified).toLocaleString();
                  const shamsiDate = new Date(report.modified).toLocaleDateString('fa-IR');
-                 // Extract info from filename: beer_game_Player_Name_timestamp.csv
                  const parts = report.filename.replace('.csv', '').split('_');
                  const rPlayerName = parts.slice(2, -1).join(' ') || 'Anonymous';
                  
@@ -1355,15 +1413,15 @@
                  document.querySelectorAll(`.report-checkbox-${lang}`).forEach(c => c.checked = e.target.checked);
              });
              document.getElementById(`delete-selected-reports-btn-${lang}`).addEventListener('click', () => {
-                const confirmModal = createModal(`confirm-modal-${lang}`, i18n.confirmDelete, `<p class="text-slate-600">${i18n.confirmDelete}</p>`, `<button id="cancel-confirm-btn-${lang}" class="material-button-text">${i18n.cancel}</button><button id="confirm-delete-btn-${lang}" class="material-button-filled bg-red-600 hover:bg-red-700">${i18n.delete}</button>`);
-                
-                 if (document.querySelectorAll(`.report-checkbox-${lang}:checked`).length > 0) {
-                     confirmModal.classList.remove('hidden');
-                     document.getElementById(`cancel-confirm-btn-${lang}`).onclick = () => confirmModal.classList.add('hidden');
-                     document.getElementById(`confirm-delete-btn-${lang}`).onclick = () => {
-                         handleDeleteSelectedReports();
-                         confirmModal.classList.add('hidden');
-                     };
+                 const selectedCount = document.querySelectorAll(`.report-checkbox-${lang}:checked`).length;
+                 if (selectedCount > 0) {
+                    const confirmModal = createModal(`confirm-modal-${lang}`, i18n.confirmDelete, `<p class="text-slate-600">${i18n.confirmDelete}</p>`, `<button id="cancel-confirm-btn-${lang}" class="material-button-text">${i18n.cancel}</button><button id="confirm-delete-btn-${lang}" class="material-button-filled bg-red-600 hover:bg-red-700">${i18n.delete}</button>`);
+                    confirmModal.classList.remove('hidden');
+                    document.getElementById(`cancel-confirm-btn-${lang}`).onclick = () => confirmModal.classList.add('hidden');
+                    document.getElementById(`confirm-delete-btn-${lang}`).onclick = () => {
+                        handleDeleteSelectedReports();
+                        confirmModal.classList.add('hidden');
+                    };
                  } else {
                      showError('noReportsSelected');
                  }
@@ -1374,19 +1432,27 @@
         async function handleDeleteSelectedReports() {
             const selectedFilenames = Array.from(document.querySelectorAll(`.report-checkbox-${lang}:checked`)).map(cb => cb.value);
             
-            try {
-                const response = await fetch(`${API_BASE_URL}?action=delete`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password: adminPassword, filenames: selectedFilenames })
-                });
-                if (!response.ok) throw new Error('Failed to delete files.');
-                await response.json(); // Wait for the body to be read
-            } catch (error) {
-                console.error(error);
-                showError('errorServer');
+            if (isOnline) {
+                try {
+                    const response = await fetch(API_BASE_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'delete', password: adminPassword, filenames: selectedFilenames })
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Failed to delete files.');
+                    }
+                } catch (error) {
+                    console.error(error);
+                    showError('errorServer');
+                }
+            } else {
+                let reports = JSON.parse(localStorage.getItem('beerGameReports') || '[]');
+                reports = reports.filter(r => !selectedFilenames.includes(r.filename));
+                localStorage.setItem('beerGameReports', JSON.stringify(reports));
             }
-            loadAndDisplayReports(); // Refresh the list
+            loadAndDisplayReports();
         }
 
         function generateCSVContent(report) {
@@ -1411,7 +1477,22 @@
         }
 
         function downloadSingleReport(filename) {
-            window.location.href = `${API_BASE_URL}?action=download&file=${encodeURIComponent(filename)}&password=${encodeURIComponent(adminPassword)}`;
+            if (isOnline) {
+                window.location.href = `${API_BASE_URL}?action=download&file=${encodeURIComponent(filename)}&password=${encodeURIComponent(adminPassword)}`;
+            } else {
+                const report = allFetchedReports.find(r => r.filename === filename);
+                if (report) {
+                    const blob = new Blob([report.content], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement("a");
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute("href", url);
+                    link.setAttribute("download", filename);
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+            }
         }
 
         async function downloadSelectedReportsAsZip() {
@@ -1420,16 +1501,24 @@
 
             const zip = new JSZip();
             
-            // Show a loading indicator if you have one
             try {
-                for (const filename of selectedFilenames) {
-                    const response = await fetch(`${API_BASE_URL}?action=download&file=${encodeURIComponent(filename)}&password=${encodeURIComponent(adminPassword)}`);
-                    if (!response.ok) {
-                        console.error(`Failed to fetch ${filename} for zipping.`);
-                        continue; // Skip this file
+                if (isOnline) {
+                    for (const filename of selectedFilenames) {
+                        const response = await fetch(`${API_BASE_URL}?action=download&file=${encodeURIComponent(filename)}&password=${encodeURIComponent(adminPassword)}`);
+                        if (!response.ok) {
+                            console.error(`Failed to fetch ${filename} for zipping.`);
+                            continue;
+                        }
+                        const fileContent = await response.text();
+                        zip.file(filename, fileContent);
                     }
-                    const fileContent = await response.text();
-                    zip.file(filename, fileContent);
+                } else {
+                    for (const filename of selectedFilenames) {
+                        const report = allFetchedReports.find(r => r.filename === filename);
+                        if (report) {
+                            zip.file(report.filename, report.content);
+                        }
+                    }
                 }
 
                 const content = await zip.generateAsync({ type: "blob" });
@@ -1443,7 +1532,6 @@
                  console.error("Zipping failed:", error);
                  showError('errorServer');
             }
-            // Hide loading indicator
         }
 
 
@@ -1506,6 +1594,4 @@
 
 </body>
 </html>
-
-
 
