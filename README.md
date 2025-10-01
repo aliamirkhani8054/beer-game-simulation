@@ -4,7 +4,7 @@ This is the open-source code for the web-based simulation of the classic "Beer G
 Play Online
 You can play the latest version of the game directly in your browser at:
 
-https://scmgames.com
+https://scmgame.com
 
 https://github.com/aliamirkhani8054/beer-game-simulation/blob/main/Screenshot%202025-09-28%20141843.png
 https://github.com/aliamirkhani8054/beer-game-simulation/blob/main/Screenshot%202025-09-28%20141925.png
